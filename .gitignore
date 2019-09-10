@@ -1,3 +1,14 @@
+# Mac OS X
+
+.DS_Store
+
+
+#images
+*.pgm
+
+#binaries
+c/nbody
+
 # Prerequisites
 *.d
 
