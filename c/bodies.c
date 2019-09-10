@@ -1,3 +1,13 @@
+/* 
+ * Part of the GalaxySim project
+ * by Thijs Havinga
+ * 
+ * This file contains the definitions for the Body struct and its functions.
+ * A Body in this context represents an object with a x,y,z coordinate, a velocity in the same dimensions,
+ * and a mass.
+ * It can exert a gravity force on other Bodies which can be computed by the given function.
+ */
+
 #include "bodies.h"
 #include <stdlib.h>
 #define G 1
