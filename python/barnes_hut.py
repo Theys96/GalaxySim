@@ -167,7 +167,7 @@ def newSpinningUniverse(n, speed):
 #nodeB.dy = 10
 
 #objs = newUniverse()
-objs = newSpinningUniverse(100, 5)
+objs = newSpinningUniverse(200, 0)
 heavyStar = Node()
 heavyStar.x = 50; heavyStar.y = 50; heavyStar.z = 50;
 heavyStar.mass = 10

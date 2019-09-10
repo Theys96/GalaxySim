@@ -1,3 +1,10 @@
+# Mac OS X
+.DS_Store
+
+
+#binaries
+c/nbody
+
 # Prerequisites
 *.d
 
