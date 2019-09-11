@@ -10,6 +10,7 @@
 
 #include "bodies.h"
 #include <stdlib.h>
+#include <stdio.h>
 #define G 1
 
 double bodyDistance(Body a, Body b) {
@@ -18,7 +19,8 @@ double bodyDistance(Body a, Body b) {
 
 void computeForce(Body a, Body b, double fvec[3]) {
 	float dist = bodyDistance(a,b);
-	int f = G * a.mass * b.mass / dist;
+	if (dist < 1) { dist = 1; }
+	int f = G * a.mass * b.mass / (dist*dist);
 	fvec[0] = (b.x - a.x)/dist * f;
 	fvec[1] = (b.y - a.y)/dist * f;
 	fvec[2] = (b.z - a.z)/dist * f;
@@ -34,4 +36,8 @@ Body newBody(double x, double y, double z, double dx, double dy, double dz, doub
 	b.dz = dz;
 	b.mass = mass;
 	return b;
+}
+
+void printBody(Body b) {
+	printf("(%.3lf,%.3lf,%.3lf) -> (%.3lf,%.3lf,%.3lf) m=%.3lf\n", b.x, b.y, b.z, b.dx, b.dy, b.dz, b.mass);
 }
