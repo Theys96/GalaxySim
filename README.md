@@ -29,3 +29,6 @@ Disrupting galaxies for cool effects:
 
 ![Disrupted galaxy 1](https://raw.githubusercontent.com/Theys96/GalaxySim/thijs/c/animation7.gif "Disrupted galaxy 1")
 ![Disrupted galaxy 2](https://raw.githubusercontent.com/Theys96/GalaxySim/thijs/c/animation8.gif "Disrupted galaxy 2")
+
+Galaxy with stars of variable mass:
+![Galaxy with stars of variable mass](https://raw.githubusercontent.com/Theys96/GalaxySim/thijs/c/animation9.gif "Galaxy with stars of variable mass")

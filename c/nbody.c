@@ -21,12 +21,10 @@ int main(int argc, char** argv) {
 	//bodies[4] = newBody(0, 0, 0, 0, 0, 0, 100);
 	double theta, r;
 	bodies[0] = newBody(0, 1, 0, 0, 0, 0, 100*N);
-	bodies[1] = newBody(250, -280, 0, -1, 0, 0, 30*N);
-	for (int i = 2; i < N; i++) {
+	for (int i = 1; i < N; i++) {
 		theta = PI * (rand() % 360) / 180;
-
 		r = (rand() % 200) + 20;
-		bodies[i] = newBody(r*cos(theta), 1+r*sin(theta), 0, -pow(100/r,0.5)*sin(theta), pow(100/r,0.5)*cos(theta), 0, 10);
+		bodies[i] = newBody(r*cos(theta), 1+r*sin(theta), 0, -pow(100/r,0.5)*sin(theta), pow(100/r,0.5)*cos(theta), 0, ((rand()%50)+1));
 	}
 	
 	int width = 600;
