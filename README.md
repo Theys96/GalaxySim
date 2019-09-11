@@ -22,8 +22,10 @@ First attempts at "galaxies":
 ![Galaxy attempt 2](https://raw.githubusercontent.com/Theys96/GalaxySim/thijs/c/animation5.gif "Galaxy attempt 2")
 
 First seemingly stable attempt with a suppermassive object in the center:
+
 ![Galaxy](https://raw.githubusercontent.com/Theys96/GalaxySim/thijs/c/animation6.gif "Galaxy")
 
 Disrupting galaxies for cool effects:
+
 ![Disrupted galaxy 1](https://raw.githubusercontent.com/Theys96/GalaxySim/thijs/c/animation7.gif "Disrupted galaxy 1")
 ![Disrupted galaxy 2](https://raw.githubusercontent.com/Theys96/GalaxySim/thijs/c/animation8.gif "Disrupted galaxy 2")
