@@ -19,22 +19,25 @@ int main(int argc, char** argv) {
 	//bodies[2] = newBody(0, -30, 0, -3, 0, 0, 1);
 	//bodies[3] = newBody(0, 30, 0, 3, 0, 0, 1);
 	//bodies[4] = newBody(0, 0, 0, 0, 0, 0, 100);
-	double theta, r;
-	bodies[0] = newBody(0, 1, 0, 0, 0, 0, 100*N);
-	for (int i = 1; i < N; i++) {
+	double theta, r, rx, ry, gapSize = 35;
+	bodies[0] = newBody(0, 10, 0, -2, 0, 0, 100*N);
+	bodies[1] = newBody(0, -10, 0, 2, 0, 0, 100*N);
+	for (int i = 2; i < N; i++) {
 		theta = PI * (rand() % 360) / 180;
-		r = (rand() % 200) + 20;
-		bodies[i] = newBody(r*cos(theta), 1+r*sin(theta), 0, -pow(100/r,0.5)*sin(theta), pow(100/r,0.5)*cos(theta), 0, ((rand()%50)+1));
+		r = (rand() % 250);
+		rx = gapSize + r * 1.0;
+		ry = gapSize + r * 1.0;
+		bodies[i] = newBody(rx*cos(theta)*0.3, 1+ry*sin(theta), 0, -2*pow(80/rx,0.5)*sin(theta), 2*pow(80/ry,0.5)*cos(theta), 0, 10);
 	}
 	
-	int width = 600;
-	int height = 600;
+	int width = 400;
+	int height = 400;
 	int cx = width/2;
 	int cy = height/2;
 
 	char filename[15];
 	double* f = calloc(3, sizeof(double));
-	int nframes = 2000;
+	int nframes = 1000;
 
 	int percent = nframes/100;
 	for (int i = 0; i < nframes; i++) {
@@ -44,8 +47,8 @@ int main(int argc, char** argv) {
 
 		Image img = newImage(width, height);
 
-		cx = width/2 - (int)bodies[0].x;
-		cy = height/2 - (int)bodies[0].y;
+		//cx = width/2 - (int)bodies[0].x;
+		//cy = height/2 - (int)bodies[0].y;
 
 		Body a;
 		for (int i = 0; i < N; i++) {
@@ -60,12 +63,9 @@ int main(int argc, char** argv) {
 		freeImage(img);
 
 		// Update locations
-		Body *b, *c;
 		for (int i = 0; i < N; i++) {
+			Body *b, *c;
 			b = &bodies[i];
-			if (i == 0) {
-				//printBody(*b);
-			}
 			for (int j = i+1; j < N; j++) {
 				c = &bodies[j];
 				computeForce(*b, *c, f);
@@ -75,13 +75,15 @@ int main(int argc, char** argv) {
 				c->dx -= DT * f[0]/(c->mass);
 				c->dy -= DT * f[1]/(c->mass);
 				c->dz -= DT * f[2]/(c->mass);
-				b->x +=  DT * b->dx;
-				b->y +=  DT * b->dy;
-				b->z +=  DT * b->dz;
-				c->x +=  DT * c->dx;
-				c->y +=  DT * c->dy;
-				c->z +=  DT * c->dz;
 			}
+		}
+		
+		// #pragma omp parallel for
+		for (int i = 0; i < N; i++) {
+			Body* b = &bodies[i];
+			b->x += b->dx;
+			b->y += b->dy;
+			b->z += b->dz;
 		}
 	}
 }
