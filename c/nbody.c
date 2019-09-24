@@ -5,13 +5,25 @@
 #include "bodies.h"
 #include "image.h"
 
-#define DT 0.05
+#define DT 0.002
 #define PI 3.141592
+
+#define ANGLES 24
+#define RADII 30
+
+#define ELLIPSES 90
+#define ENUM 60
+#define EANGLE 8
+#define EWIDTH 2
+#define BODIES (ELLIPSES * ENUM + 1)
+#define SCALE 5
+#define DIMENSIONS 400
+#define FRAMES 1000
 
 int main(int argc, char** argv) {
 	srand(time(NULL));
 
-	int N = 5000;
+	int N = BODIES;
 	Body bodies[N];
 
 	//bodies[0] = newBody(-30, 0, 0, 0, 3, 0, 1);
@@ -22,28 +34,86 @@ int main(int argc, char** argv) {
 	//bodies[0] = newBody(0, 0, 0, 0, 0, 0, 100000);
 	//bodies[1] = newBody(0, -100, 0, sqrt(100200/100), 0, 0, 200);
 
-	bodies[0] = newBody(-10, 0, 0, 0, 0, 50, 100000);
-	bodies[1] = newBody(10, 0, 0, 0, 0, -50, 100000);
+	/*
+	bodies[0] = newBody(0, 0, 0, 0, 0, 0, 100000);
+	//bodies[N-1] = newBody(0, -250, 0, sqrt(100100/250), 0, 0, 1000);
+	double theta, r;
+	for (int i = 1; i <= RADII; i++) {
+		r = 20 + i * 30;
+		for (int a = 0; a < ANGLES; a++) {
+			theta = PI * (a*(360/ANGLES)) / 180;
+			bodies[a*RADII+i] = newBody(r*cos(theta), r*sin(theta), 0, -sqrt(100010/r)*sin(theta), sqrt(100010/r)*cos(theta), 0, 10);
+		}
+	}
+	*/
 
-	double theta, r, rx, ry, gapSize = 50, mass;
-	for (int i = 2; i < N; i++) {
+	bodies[N-1] = newBody(0, 0, 0, 0, 0, 0, 100000000);
+	/*
+	for (int i = 1; i < N; i++) {
+		theta = PI * (rand() % 360) / 180;
+		r = rand() % (200 - (int)gapSize);
+		rx = gapSize + r * 1.0;
+		ry = gapSize + r * 1.0;
+		mass = 10; //2+(rand() % 4)*2;
+		// 2*pow(100/rx,0.5)
+		bodies[i] = newBody(rx*cos(theta), ry*sin(theta), 0, -(sqrt(100000/rx))*sin(theta), (sqrt(100000/rx))*cos(theta), 0, mass);
+	}*/
+
+
+	double theta, rot, r, vr, rx, ry, vx, vy, gapSize = 25, localwidth, mass = 1;
+	for (int e = 0; e < ELLIPSES; e++) {
+		localwidth = EWIDTH * exp(1+(double)e/ELLIPSES);
+		rot = EANGLE*e * PI/180;
+		for (int i = 0; i < ENUM; i++) {
+			theta = PI * (rand() % 360) / 180;
+			r = (double)(rand() % (int)(localwidth*1000))/1000;
+			vr = r;
+			rx = (gapSize + r) * cos(theta) * 1;
+			ry = (gapSize + r) * sin(theta) * .9;
+			r = sqrt(rx*rx + ry*ry);
+			theta = atan2(rx,ry);
+			theta -= rot;
+			rx = r*cos(theta);
+			ry = r*sin(theta);
+			vx = -sqrt(100000000/r)*sin(theta);
+			vy = sqrt(100000000/r)*cos(theta);
+			bodies[e*ENUM + i] = newBody(rx, ry, 0, vx, vy, 0, mass);
+		}
+		gapSize += localwidth;
+	}
+
+	/*
+	double theta, r, rx, ry, gapSize = 5, mass;
+	for (int i = 0; i < 500; i++) {
+		theta = PI * (rand() % 360) / 180;
+		r = rand() % (100 - (int)gapSize);
+		rx = gapSize + r * 1.0;
+		ry = gapSize + r * 1.0;
+		mass = 1000; //2+(rand() % 4)*2;
+		// 2*pow(100/rx,0.5)
+		bodies[i] = newBody(rx*cos(theta), 1+ry*sin(theta), 0, -(sqrt((500*mass)/(4*rx)))*sin(theta), (sqrt((500*mass)/(4*ry)))*cos(theta), 0, mass);
+	}
+
+	gapSize = 150;
+	for (int i = 500; i < N; i++) {
 		theta = PI * (rand() % 360) / 180;
 		r = rand() % (400 - (int)gapSize);
 		rx = gapSize + r * 1.0;
 		ry = gapSize + r * 1.0;
-		mass = 2+(rand() % 4)*2;
+		mass = 1; //2+(rand() % 4)*2;
 		// 2*pow(100/rx,0.5)
-		bodies[i] = newBody(rx*cos(theta), 1+ry*sin(theta), 0, -(sqrt(200001/(rx+20)))*sin(theta), (sqrt(200001/(ry+20)))*cos(theta), 0, mass);
+		bodies[i] = newBody(rx*cos(theta), 1+ry*sin(theta), 0, -(sqrt((500*1000+mass)/(rx)))*sin(theta), (sqrt((500*1000+mass)/(ry)))*cos(theta), 0, mass);
 	}
+	*/
 	
-	int width = 1000;
-	int height = 1000;
+	int width = DIMENSIONS;
+	int height = DIMENSIONS;
 	int cx = width/2;
 	int cy = height/2;
 
 	char filename[15];
 	double* f = calloc(3, sizeof(double));
-	int nframes = 2000;
+	int nframes = FRAMES;
 
 	int percent = nframes/100;
 
@@ -56,18 +126,16 @@ int main(int argc, char** argv) {
 		//cx = width/2 - (int)bodies[0].x;
 		//cy = height/2 - (int)bodies[0].y;
 
-		Body a;
-		if (frame > nframes/10*9 || frame%1 == 0) {
-
-			
-
-
+		if (1) {
+			Body a;
 			Image img = newImage(width, height);
+			int rx, ry;
 			for (int i = 0; i < N; i++) {
 				a = bodies[i];
-				if ( (int)(a.x+cx) >= 0 && (int)(a.x+cx) < width && (int)(a.y+cy) >= 0 && (int)(a.y+cy) < height) {
-					img.img[(int)a.y+cy][(int)a.x+cx] = a.mass > 100 ? 255 : 255;
-					
+				rx = (int)((a.x/SCALE+cx));
+				ry = (int)((a.y/SCALE+cy));
+				if ( rx >= 0 && rx < width && ry >= 0 && ry < height) {
+					img.img[ry][rx] = a.mass > 100 ? 0 : 255;
 				}
 			}
 
