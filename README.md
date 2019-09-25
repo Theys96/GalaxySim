@@ -10,4 +10,4 @@ The program generates a lot (500) of image frames. They can be combined into an 
     convert -delay 4 -loop 0 *.pgm image.gif
 **Note:** there are many ways to install ImageMagick. On a Mac with [Homebrew](https://brew.sh) you can simply `brew install imagemagick`.
 
-![One of the first attempts at a spiral galaxy](https://raw.githubusercontent.com/Theys96/GalaxySim/thijs/c/aspiral7.gif "One of the first attempts at a spiral galaxy")
+![One of the first attempts at a spiral galaxy](https://raw.githubusercontent.com/Theys96/GalaxySim/thijs/c/aspiral11.gif "One of the first attempts at a spiral galaxy")
