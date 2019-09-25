@@ -5,20 +5,21 @@
 #include "bodies.h"
 #include "image.h"
 
-#define DT 0.002
+#define DT 0.005
 #define PI 3.141592
+#define E 2.
 
 #define ANGLES 24
 #define RADII 30
 
-#define ELLIPSES 90
-#define ENUM 60
-#define EANGLE 8
-#define EWIDTH 2
+#define ELLIPSES 1440
+#define ENUM 6
+#define EANGLE 0.8
+#define EWIDTH 4
 #define BODIES (ELLIPSES * ENUM + 1)
-#define SCALE 5
-#define DIMENSIONS 400
-#define FRAMES 1000
+#define SCALE 12
+#define DIMENSIONS 500
+#define FRAMES 10000
 
 int main(int argc, char** argv) {
 	srand(time(NULL));
@@ -60,9 +61,9 @@ int main(int argc, char** argv) {
 	}*/
 
 
-	double theta, rot, r, vr, rx, ry, vx, vy, gapSize = 25, localwidth, mass = 1;
+	double theta, rot, r, vr, rx, ry, vx, vy, gapSize = 200, localwidth, mass = 1;
 	for (int e = 0; e < ELLIPSES; e++) {
-		localwidth = EWIDTH * exp(1+(double)e/ELLIPSES);
+		localwidth = EWIDTH*(exp(1+2*(float)e/ELLIPSES)/(exp(3)-exp(1))); //* exp(1+2*(double)e/ELLIPSES);
 		rot = EANGLE*e * PI/180;
 		for (int i = 0; i < ENUM; i++) {
 			theta = PI * (rand() % 360) / 180;
