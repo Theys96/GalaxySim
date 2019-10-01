@@ -7,7 +7,7 @@
 *.pgm
 
 #binaries
-c/nbody
+src/nbody
 
 # Prerequisites
 *.d
