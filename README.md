@@ -13,5 +13,6 @@ The program generates a lot (500) of image frames. They can be combined into an 
 
 To get rid of all those .pgm images, simply run `make clean`.
 
-Animation examples:
+Animation example:
 
+![Example animation](https://raw.githubusercontent.com/Theys96/GalaxySim/develop/src/img/image.gif "Example animation")
