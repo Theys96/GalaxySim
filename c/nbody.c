@@ -12,14 +12,19 @@
 #define ANGLES 24
 #define RADII 30
 
-#define ELLIPSES 1440
-#define ENUM 6
+#define ELLIPSES 500
+#define ENUM 2
 #define EANGLE 0.8
 #define EWIDTH 4
 #define BODIES (ELLIPSES * ENUM + 1)
 #define SCALE 12
-#define DIMENSIONS 500
-#define FRAMES 10000
+#define DIMENSIONS 800
+#define FRAMES 500
+
+void printTimestamp() {
+	time_t ltime = time(NULL);
+	printf("%s\n",asctime(localtime(&ltime)));
+}
 
 int main(int argc, char** argv) {
 	srand(time(NULL));
@@ -116,17 +121,29 @@ int main(int argc, char** argv) {
 	double* f = calloc(3, sizeof(double));
 	int nframes = FRAMES;
 
+	printf("\nGalaxySim n-body simulation vTHIJS-0.0\n");
+	printTimestamp();
+
+	printf("Specifications:\n");
+	printf("\tn = %d\n", BODIES);
+	printf("\timage dimensions = %dx%d\n", DIMENSIONS, DIMENSIONS);
+	printf("\tframes = %d\n", nframes);
+	printf("\n");
+	clock_t t0, t1;
+	double timeRendering = 0, timeComputing = 0;
+
 	int percent = nframes/100;
 
 	for (int frame = 0; frame < nframes; frame++) {
 		if (frame % percent == 0) {
-			printf("%d%%\n", frame/percent);
+			// printf("%d%%\n", frame/percent);
 		}
 
 
 		//cx = width/2 - (int)bodies[0].x;
 		//cy = height/2 - (int)bodies[0].y;
 
+		t0 = clock();
 		if (1) {
 			Body a;
 			Image img = newImage(width, height);
@@ -144,7 +161,11 @@ int main(int argc, char** argv) {
 			saveImage(img, filename);
 			freeImage(img);
 		}
+		t1 = clock();
+		timeRendering += (double)(t1 - t0) / CLOCKS_PER_SEC;
 
+
+		t0 = clock();
 		// Update velocities
 		for (int i = 0; i < N; i++) {
 			Body *b, *c;
@@ -168,6 +189,18 @@ int main(int argc, char** argv) {
 			b->y += DT * b->dy;
 			b->z += DT * b->dz;
 		}
+		t1 = clock();
+		timeComputing += (double)(t1 - t0) / CLOCKS_PER_SEC;
 	}
+
+	printf("\nDone.\n");
+	printf("Time used rendering images and saving them to file:\n");
+	printf("\t%.3fs total for %d frames\n", timeRendering, nframes);
+	printf("\t%.3fms on average\n", timeRendering / nframes * 1000 );
+	printf("\n");
+	printf("Time used updating the universe state:\n");
+	printf("\t%.3fs total for %d frames\n", timeComputing, nframes);
+	printf("\t%.3fms on average\n", timeComputing / nframes * 1000 );
+	printf("\n");
 
 }
