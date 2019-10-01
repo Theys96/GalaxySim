@@ -22,7 +22,7 @@ void renderUniverse(Universe u, char* filename, int width, int height, int cx, i
 		ax = (int)((a.x/scale+cx));
 		ay = (int)((a.y/scale+cy));
 		if ( ax >= 0 && ax < width && ay >= 0 && ay < height) {
-			img.img[ay][ax] = 255;
+			setPixel(img, ax, ay, 255);
 		}
 	}
 

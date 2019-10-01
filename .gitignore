@@ -5,6 +5,7 @@
 
 #images
 *.pgm
+*.pbm
 
 #binaries
 src/nbody
