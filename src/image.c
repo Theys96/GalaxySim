@@ -1,31 +1,41 @@
 #include "image.h"
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 
 Image newImage(int width, int height) {
 	Image img;
 	img.width = width;
+	img.bytewidth = width % 8 == 0 ? width/8 : width/8 + 1;
 	img.height = height;
 
-	img.img = (int**)calloc(height, sizeof(int*));
+	img.img = (byte**)calloc(height, sizeof(byte*));
 	for (int y = 0; y < height; y++) {
-		img.img[y] = calloc(width, sizeof(int));
+		img.img[y] = calloc(img.bytewidth, sizeof(byte));
+		memset(img.img[y], 255, img.bytewidth);
 	}
 	return img;
+}
+
+void setPixel(Image img, int x, int y, int val) {
+	if (val) {
+		img.img[y][x/8] &= ~(1UL << (7-x%8));
+	} else {
+		img.img[y][x/8] |= 1UL << (7-x%8);
+	}
 }
 
 void saveImage(Image img, char* filename) {
 	FILE* pgmimg; 
     pgmimg = fopen(filename, "wb"); 
 
-    fprintf(pgmimg, "P2\n");								// Magic bytes
+    fprintf(pgmimg, "P4\n");								// Magic bytes
     fprintf(pgmimg, "%d %d\n", img.width, img.height);		// Dimensions
-    fprintf(pgmimg, "255\n");								// Upper value
     for (int i = 0; i < img.height; i++) { 
-        for (int j = 0; j < img.width; j++) {
-            fprintf(pgmimg, "%d ", img.img[i][j]); 
+        for (int j = 0; j < img.bytewidth ; j++) {
+            fprintf(pgmimg, "%c", img.img[i][j]); 
         } 
-        fprintf(pgmimg, "\n"); 
+        //fprintf(pgmimg, "\n"); 
     }
     fclose(pgmimg); 
 }

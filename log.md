@@ -49,3 +49,31 @@ Time used updating the universe state:
 ```
 
 For now, we are generating small images to work around the overhead of saving to file.
+
+## Version 0.2
+
+This new version generates binary (.pbm) files where every pixel is denoted by a single bit. 
+This takes much less IO and generates much smaller images files, resulting in less time spent saving the images (nearly 17x speedup!).
+
+```
+$ ./nbody 300 1000
+
+GalaxySim n-body simulation v0.2
+Tue Oct  1 17:49:23 2019
+
+Specifications:
+	n = 300
+	image dimensions = 400x400
+	frames = 1000
+
+Done.
+
+Time used rendering images and saving them to file:
+	1.359s total for 1000 frames
+	1.359ms on average
+
+Time used updating the universe state:
+	12.964s total for 1000 frames
+	12.964ms on average
+
+```

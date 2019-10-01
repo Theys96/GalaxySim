@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
 
 	Universe uni = newCircularUniverse(1000, 250, 30);
 
-	printf("\nGalaxySim n-body simulation v0.1\n");
+	printf("\nGalaxySim n-body simulation v0.2\n");
 	printTimestamp();
 
 	printf("Specifications:\n");
@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
 	clock_t t0, t1;
 	double timeRendering = 0, timeComputing = 0;
 	for (int i = 0; i < nframes; i++) {
-		sprintf(filename, "img/image%04d.pgm", i+1);
+		sprintf(filename, "img/image%04d.pbm", i+1);
 
 		t0 = clock();
 		renderUniverse(uni, filename, size, size, 0, 0, 1);
