@@ -10,13 +10,13 @@ void printTimestamp() {
 
 int main(int argc, char** argv) {
 	
-	int n = 1000;
-	int size = 800;
-	int nframes = 500;
+	int n = argc > 1 ? atoi(argv[1]) : 1000;
+	int size = 400;
+	int nframes = argc > 2 ? atoi(argv[2]) : 500;
 
-	Universe uni = newCircularUniverse(1000, 300, 35);
+	Universe uni = newCircularUniverse(1000, 250, 30);
 
-	printf("\nGalaxySim n-body simulation v0.0\n");
+	printf("\nGalaxySim n-body simulation v0.1\n");
 	printTimestamp();
 
 	printf("Specifications:\n");
@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
 		timeComputing += (double)(t1 - t0) / CLOCKS_PER_SEC;
 	}
 
-	printf("Done.\n");
+	printf("Done.\n\n");
 	printf("Time used rendering images and saving them to file:\n");
 	printf("\t%.3fs total for %d frames\n", timeRendering, nframes);
 	printf("\t%.3fms on average\n", timeRendering / nframes * 1000 );
