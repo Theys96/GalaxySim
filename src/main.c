@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
 
 	Universe uni = newCircularUniverse(1000, 250, 30);
 
-	printf("\nGalaxySim n-body simulation v0.2\n");
+	printf("\nGalaxySim n-body simulation v0.4\n");
 	printTimestamp();
 
 	printf("Specifications:\n");
@@ -26,8 +26,9 @@ int main(int argc, char** argv) {
 	printf("\n");
 
 	char filename[20];
-	clock_t t0, t1;
+	clock_t t0, t1, total0, total1;
 	double timeRendering = 0, timeComputing = 0;
+	total0 = clock();
 	for (int i = 0; i < nframes; i++) {
 		sprintf(filename, "img/image%04d.pbm", i+1);
 
@@ -41,8 +42,10 @@ int main(int argc, char** argv) {
 		t1 = clock();
 		timeComputing += (double)(t1 - t0) / CLOCKS_PER_SEC;
 	}
+	total1 = clock();
 
-	printf("Done.\n\n");
+	printf("Done.\n");
+	printf("Time used: %.3fs\n\n", (double)(total1 - total0) / CLOCKS_PER_SEC );
 	printf("Time used rendering images and saving them to file:\n");
 	printf("\t%.3fs total for %d frames\n", timeRendering, nframes);
 	printf("\t%.3fms on average\n", timeRendering / nframes * 1000 );
