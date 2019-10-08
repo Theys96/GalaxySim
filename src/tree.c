@@ -152,22 +152,26 @@ void computeMass(Subnode *s) {
     s->centerOfMass[1] = s->value->y;
     s->centerOfMass[2] = s->value->z;
     s->mass = s->value->mass;
-  } else {
+  } else if (s->node_count > 1) {
     s->mass = 0.0;
     s->centerOfMass[0] = 0.0;
     s->centerOfMass[1] = 0.0;
     s->centerOfMass[2] = 0.0;
     Subnode *childs[8] = {s->childTopNE, s->childTopNW, s->childTopSE, s->childTopSW, s->childBottomNE, s->childBottomNW, s->childBottomSE, s->childBottomSW};
     for (size_t i = 0; i < 8; i++) {
-      computeMass(childs[0]);
-      s->mass += childs[0]->value->mass;
-      s->centerOfMass[0] += childs[0]->value->x;
-      s->centerOfMass[1] += childs[0]->value->y;
-      s->centerOfMass[2] += childs[0]->value->z;
+      if (childs[i] != NULL) {
+        computeMass(childs[i]);
+        s->mass += childs[i]->mass;
+        s->centerOfMass[0] += childs[i]->centerOfMass[0];
+        s->centerOfMass[1] += childs[i]->centerOfMass[1];
+        s->centerOfMass[2] += childs[i]->centerOfMass[2];
+      }
     }
-    s->centerOfMass[0] /= s->mass;
-    s->centerOfMass[1] /= s->mass;
-    s->centerOfMass[2] /= s->mass;
+    if (s->mass > 0.0) {
+      s->centerOfMass[0] /= s->mass;
+      s->centerOfMass[1] /= s->mass;
+      s->centerOfMass[2] /= s->mass;
+    }
   }
 }
 
