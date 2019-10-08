@@ -34,7 +34,7 @@ struct Subnode {
   Body *value;
   double mass;
   double centerOfMass[3];
-  UniverseSize *universe_size;
+  UniverseSize universe_size;
   int node_count;
 };
 

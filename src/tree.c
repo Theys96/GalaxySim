@@ -12,14 +12,6 @@
 #include <math.h>
 #include <time.h>
 
-// Position newPosition() {
-//   Position pos;
-//   pos.x = 0.0;
-//   pos.y = 0.0;
-//   pos.z = 0.0;
-//   return pos;
-// }
-
 Subnode newSubnode(UniverseSize *universe_size) {
   Subnode s;
   s.childTopNE = NULL;
@@ -36,7 +28,7 @@ Subnode newSubnode(UniverseSize *universe_size) {
   s.centerOfMass[1] = 0.0;
   s.centerOfMass[2] = 0.0;
   // s.centerOfMass = newPosition();
-  s.universe_size = universe_size;
+  s.universe_size = *universe_size;
   s.node_count = 0;
   return s;
 }
@@ -47,8 +39,7 @@ Tree newTree(Body *bodies, int n) {
   UniverseSize universe_size = getUniverseSize(bodies, n);
   *t.root = newSubnode(&universe_size);
   for (int i = 0; i < n; i++) {
-    Body body;
-    insertBody(t.root, &body);
+    insertBody(t.root, bodies + i);
   }
   return t;
 }
@@ -65,6 +56,7 @@ void insertBody(Subnode *s, Body *body) {
     Subnode **quadrant2 = getQuadrant(s, body);
     insertBody(*quadrant2, body);
   } else {
+    s->value = calloc(1, sizeof(Body));
     s->value = body;
   }
   s->node_count++;
@@ -102,53 +94,53 @@ UniverseSize getUniverseSize(Body *bodies, int n) {
 Subnode **getQuadrant(Subnode *s, Body *body) {
   Subnode **quadrant = NULL;
   UniverseSize new_universe_size;
-  memcpy(&new_universe_size, s->universe_size, sizeof(UniverseSize));
-  if (body->z <= (s->universe_size->max_z + s->universe_size->min_z) / 2.0) {
-    new_universe_size.max_z = (s->universe_size->max_z + s->universe_size->min_z) / 2.0;
-    if (body->y <= (s->universe_size->max_y + s->universe_size->min_y) / 2.0) {
-      new_universe_size.max_y = (s->universe_size->max_y + s->universe_size->min_y) / 2.0;
-      if (body->x <= (s->universe_size->max_x + s->universe_size->min_x) / 2.0) {
-        new_universe_size.max_x = (s->universe_size->max_x + s->universe_size->min_x) / 2.0;
+  memcpy(&new_universe_size, &(s->universe_size), sizeof(UniverseSize));
+  if (body->z <= (s->universe_size.max_z + s->universe_size.min_z) / 2.0) {
+    new_universe_size.max_z = (s->universe_size.max_z + s->universe_size.min_z) / 2.0;
+    if (body->y <= (s->universe_size.max_y + s->universe_size.min_y) / 2.0) {
+      new_universe_size.max_y = (s->universe_size.max_y + s->universe_size.min_y) / 2.0;
+      if (body->x <= (s->universe_size.max_x + s->universe_size.min_x) / 2.0) {
+        new_universe_size.max_x = (s->universe_size.max_x + s->universe_size.min_x) / 2.0;
         quadrant = &s->childTopNW;
       } else {
-        new_universe_size.min_x = (s->universe_size->max_x + s->universe_size->min_x) / 2.0;
+        new_universe_size.min_x = (s->universe_size.max_x + s->universe_size.min_x) / 2.0;
         quadrant = &s->childTopNE;
       }
     } else {
-      new_universe_size.min_y = (s->universe_size->max_y + s->universe_size->min_y) / 2.0;
-      if (body->x <= (s->universe_size->max_x + s->universe_size->min_x) / 2.0) {
-        new_universe_size.max_x = (s->universe_size->max_x + s->universe_size->min_x) / 2.0;
+      new_universe_size.min_y = (s->universe_size.max_y + s->universe_size.min_y) / 2.0;
+      if (body->x <= (s->universe_size.max_x + s->universe_size.min_x) / 2.0) {
+        new_universe_size.max_x = (s->universe_size.max_x + s->universe_size.min_x) / 2.0;
         quadrant = &s->childTopSW;
       } else {
-        new_universe_size.min_x = (s->universe_size->max_x + s->universe_size->min_x) / 2.0;
+        new_universe_size.min_x = (s->universe_size.max_x + s->universe_size.min_x) / 2.0;
         quadrant = &s->childTopSE;
       }
     }
   } else {
-    new_universe_size.min_z = (s->universe_size->max_z + s->universe_size->min_z) / 2.0;
-    if (body->y <= (s->universe_size->max_y + s->universe_size->min_y) / 2.0) {
-      new_universe_size.max_y = (s->universe_size->max_y + s->universe_size->min_y) / 2.0;
-      if (body->x <= (s->universe_size->max_x + s->universe_size->min_x) / 2.0) {
-        new_universe_size.max_x = (s->universe_size->max_x + s->universe_size->min_x) / 2.0;
+    new_universe_size.min_z = (s->universe_size.max_z + s->universe_size.min_z) / 2.0;
+    if (body->y <= (s->universe_size.max_y + s->universe_size.min_y) / 2.0) {
+      new_universe_size.max_y = (s->universe_size.max_y + s->universe_size.min_y) / 2.0;
+      if (body->x <= (s->universe_size.max_x + s->universe_size.min_x) / 2.0) {
+        new_universe_size.max_x = (s->universe_size.max_x + s->universe_size.min_x) / 2.0;
         quadrant = &s->childBottomNW;
       } else {
-        new_universe_size.min_x = (s->universe_size->max_x + s->universe_size->min_x) / 2.0;
+        new_universe_size.min_x = (s->universe_size.max_x + s->universe_size.min_x) / 2.0;
         quadrant = &s->childBottomNE;
       }
     } else {
-      new_universe_size.min_y = (s->universe_size->max_y + s->universe_size->min_y) / 2.0;
-      if (body->x <= (s->universe_size->max_x + s->universe_size->min_x) / 2.0) {
-        new_universe_size.max_x = (s->universe_size->max_x + s->universe_size->min_x) / 2.0;
+      new_universe_size.min_y = (s->universe_size.max_y + s->universe_size.min_y) / 2.0;
+      if (body->x <= (s->universe_size.max_x + s->universe_size.min_x) / 2.0) {
+        new_universe_size.max_x = (s->universe_size.max_x + s->universe_size.min_x) / 2.0;
         quadrant = &s->childBottomSW;
       } else {
-        new_universe_size.min_x = (s->universe_size->max_x + s->universe_size->min_x) / 2.0;
+        new_universe_size.min_x = (s->universe_size.max_x + s->universe_size.min_x) / 2.0;
         quadrant = &s->childBottomSE;
       }
     }
   }
   if (*quadrant == NULL) {
-    Subnode new_subnode = newSubnode(&new_universe_size);
-    *quadrant = &new_subnode;
+    *quadrant = calloc(1, sizeof(Subnode));
+    **quadrant = newSubnode(&new_universe_size);
   }
 
   return quadrant;
@@ -185,7 +177,7 @@ void computeForceFromTree(Body *object, Subnode *s, double fvec[3]) {
   } else {
     double delta = 0.5;
     double radius = sqrt(pow(object->x - s->value->x, 2) + pow(object->y - s->value->y, 2) + pow(object->z - s->value->z, 2));
-    double height = s->universe_size->max_x - s->universe_size->min_x;
+    double height = s->universe_size.max_x - s->universe_size.min_x;
     if (height/radius < delta) {
       computeForce(*object, *s->value, fvec);
     } else {
