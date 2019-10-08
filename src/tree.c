@@ -22,12 +22,8 @@ Subnode newSubnode(UniverseSize *universe_size) {
   s.childBottomNW = NULL;
   s.childBottomSE = NULL;
   s.childBottomSW = NULL;
-  s.value = NULL;
-  // s.mass = 0.0;
-  s.centerOfMass[0] = 0.0;
-  s.centerOfMass[1] = 0.0;
-  s.centerOfMass[2] = 0.0;
-  // s.centerOfMass = newPosition();
+  s.value = calloc(1, sizeof(Body));
+  *(s.value) = newBody(0,0,0,0,0,0,0);
   s.universe_size = *universe_size;
   s.node_count = 0;
   return s;
@@ -51,13 +47,18 @@ void insertBody(Subnode *s, Body *body) {
   } else if (s->node_count == 1) {
     Subnode **quadrant = getQuadrant(s, s->value);
     insertBody(*quadrant, s->value);
-    s->value = NULL;
+    s->value->x = 0;
+    s->value->y = 0;
+    s->value->z = 0;
+    s->value->mass = 0;
 
     Subnode **quadrant2 = getQuadrant(s, body);
     insertBody(*quadrant2, body);
   } else {
-    s->value = calloc(1, sizeof(Body));
-    s->value = body;
+    s->value->x = body->x;
+    s->value->y = body->y;
+    s->value->z = body->z;
+    s->value->mass = body->mass;
   }
   s->node_count++;
 }
@@ -147,30 +148,25 @@ Subnode **getQuadrant(Subnode *s, Body *body) {
 }
 
 void computeMass(Subnode *s) {
-  if (s->node_count == 1) {
-    s->centerOfMass[0] = s->value->x;
-    s->centerOfMass[1] = s->value->y;
-    s->centerOfMass[2] = s->value->z;
-    s->mass = s->value->mass;
-  } else if (s->node_count > 1) {
-    s->mass = 0.0;
-    s->centerOfMass[0] = 0.0;
-    s->centerOfMass[1] = 0.0;
-    s->centerOfMass[2] = 0.0;
+  if (s->node_count > 1) {
+    s->value->mass = 0.0;
+    s->value->x = 0.0;
+    s->value->y = 0.0;
+    s->value->z = 0.0;
     Subnode *childs[8] = {s->childTopNE, s->childTopNW, s->childTopSE, s->childTopSW, s->childBottomNE, s->childBottomNW, s->childBottomSE, s->childBottomSW};
     for (size_t i = 0; i < 8; i++) {
       if (childs[i] != NULL) {
         computeMass(childs[i]);
-        s->mass += childs[i]->mass;
-        s->centerOfMass[0] += childs[i]->centerOfMass[0];
-        s->centerOfMass[1] += childs[i]->centerOfMass[1];
-        s->centerOfMass[2] += childs[i]->centerOfMass[2];
+        s->value->mass += childs[i]->value->mass;
+        s->value->x += childs[i]->value->x;
+        s->value->y += childs[i]->value->y;
+        s->value->z += childs[i]->value->z;
       }
     }
-    if (s->mass > 0.0) {
-      s->centerOfMass[0] /= s->mass;
-      s->centerOfMass[1] /= s->mass;
-      s->centerOfMass[2] /= s->mass;
+    if (s->value->mass > 0.0) {
+      s->value->x /= s->value->mass;
+      s->value->x /= s->value->mass;
+      s->value->x /= s->value->mass;
     }
   }
 }
@@ -187,11 +183,13 @@ void computeForceFromTree(Body *object, Subnode *s, double fvec[3]) {
     } else {
       Subnode *childs[8] = {s->childTopNE, s->childTopNW, s->childTopSE, s->childTopSW, s->childBottomNE, s->childBottomNW, s->childBottomSE, s->childBottomSW};
       for (size_t i = 0; i < 8; i++) {
-        double fsubvec[3];
-        computeForceFromTree(object, childs[i], fsubvec);
-        fvec[0] += fsubvec[0];
-        fvec[1] += fsubvec[1];
-        fvec[2] += fsubvec[2];
+        if (childs[i] != NULL) {
+          double fsubvec[3];
+          computeForceFromTree(object, childs[i], fsubvec);
+          fvec[0] += fsubvec[0];
+          fvec[1] += fsubvec[1];
+          fvec[2] += fsubvec[2];
+        }
       }
     }
   }
