@@ -5,13 +5,11 @@
  * TODO: Library description to be written here.
  */
 
+#ifndef TREE_H
+#define TREE_H 1
 #include "bodies.h"
 
-typedef struct Position {
-  double x;
-  double y;
-  double z;
-} Position;
+typedef struct Body Body;
 
 typedef struct UniverseSize {
   double min_x;
@@ -21,11 +19,6 @@ typedef struct UniverseSize {
   double min_z;
   double max_z;
 } UniverseSize;
-
-typedef struct Node {
-  Position pos;
-  double mass;
-} Node;
 
 typedef struct Subnode Subnode;
 
@@ -38,9 +31,9 @@ struct Subnode {
   Subnode *childBottomNW;
   Subnode *childBottomSE;
   Subnode *childBottomSW;
-  Node *value;
+  Body *value;
   double mass;
-  Position centerOfMass;
+  double centerOfMass[3];
   UniverseSize *universe_size;
   int node_count;
 };
@@ -49,11 +42,14 @@ typedef struct Tree {
 	Subnode *root;
 } Tree;
 
-Position newPosition();
-Node newNode();
+// Position newPosition();
 Subnode newSubnode();
 Tree newTree(Body *bodies, int n);
 
-void insertNode(Subnode *t, Node *node);
+void insertBody(Subnode *t, Body *body);
 UniverseSize getUniverseSize(Body *bodies, int n);
-Subnode **getQuadrant(Subnode *s, Node *node);
+Subnode **getQuadrant(Subnode *s, Body *body);
+
+void computeMass(Subnode *s);
+void computeForceFromTree(Body *object, Subnode *s, double fvec[3]);
+#endif

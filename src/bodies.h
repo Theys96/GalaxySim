@@ -8,6 +8,9 @@
  * It can exert a gravity force on other Bodies which can be computed by the given function.
  */
 
+#ifndef BODIES_H
+#define BODIES_H 1
+#include "tree.h"
 
 typedef struct Body {
 	double x;
@@ -32,3 +35,4 @@ Universe newUniverse(int N);
 Universe newCircularUniverse(int n, int r, int gapSize);
 void iterateNaive(Universe* u, double dt);
 void freeUniverse(Universe u);
+#endif

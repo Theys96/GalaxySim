@@ -68,22 +68,37 @@ Universe newCircularUniverse(int n, int size, int gapSize) {
 
 void iterateNaive(Universe* u, double dt) {
 	double f[3];
-	Body *b, *c;
+	// Body *b, *c;
+  Body *b;
 
-	// Update velocities
-	for (int i = 0; i < u->n; i++) {
-		b = u->bodies + i;
-		for (int j = i+1; j < u->n; j++) {
-			c = u->bodies + j;
-			computeForce(*b, *c, f);
-			b->dx += dt * f[0]/(b->mass);
-			b->dy += dt * f[1]/(b->mass);
-			b->dz += dt * f[2]/(b->mass);
-			c->dx -= dt * f[0]/(c->mass);
-			c->dy -= dt * f[1]/(c->mass);
-			c->dz -= dt * f[2]/(c->mass);
-		}
-	}
+  // Create Tree and calculate masses of the center of gravities
+  Tree t = newTree(u->bodies, u->n);
+  computeMass(t.root);
+
+  // Update velocities
+  for (int i = 0; i < u->n; i++) {
+    double fvec[3];
+    b = u->bodies + i;
+    computeForceFromTree(b, t.root, fvec);
+    b->dx += dt * f[0]/(b->mass);
+    b->dy += dt * f[1]/(b->mass);
+    b->dz += dt * f[2]/(b->mass);
+  }
+
+	// // Update velocities
+	// for (int i = 0; i < u->n; i++) {
+	// 	b = u->bodies + i;
+	// 	for (int j = i+1; j < u->n; j++) {
+	// 		c = u->bodies + j;
+	// 		computeForce(*b, *c, f);
+	// 		b->dx += dt * f[0]/(b->mass);
+	// 		b->dy += dt * f[1]/(b->mass);
+	// 		b->dz += dt * f[2]/(b->mass);
+	// 		c->dx -= dt * f[0]/(c->mass);
+	// 		c->dy -= dt * f[1]/(c->mass);
+	// 		c->dz -= dt * f[2]/(c->mass);
+	// 	}
+	// }
 
 	// Update locations
 	for (int i = 0; i < u->n; i++) {

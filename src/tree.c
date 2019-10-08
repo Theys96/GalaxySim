@@ -12,23 +12,13 @@
 #include <math.h>
 #include <time.h>
 
-Position newPosition() {
-  Position pos;
-  pos.x = 0.0;
-  pos.y = 0.0;
-  pos.z = 0.0;
-  return pos;
-}
-
-Node newNode(Body *body) {
-  Node n;
-  n.pos = newPosition();
-  n.pos.x = body->x;
-  n.pos.y = body->y;
-  n.pos.z = body->z;
-  n.mass = body->mass;
-  return n;
-}
+// Position newPosition() {
+//   Position pos;
+//   pos.x = 0.0;
+//   pos.y = 0.0;
+//   pos.z = 0.0;
+//   return pos;
+// }
 
 Subnode newSubnode(UniverseSize *universe_size) {
   Subnode s;
@@ -41,8 +31,11 @@ Subnode newSubnode(UniverseSize *universe_size) {
   s.childBottomSE = NULL;
   s.childBottomSW = NULL;
   s.value = NULL;
-  s.mass = 0.0;
-  s.centerOfMass = newPosition();
+  // s.mass = 0.0;
+  s.centerOfMass[0] = 0.0;
+  s.centerOfMass[1] = 0.0;
+  s.centerOfMass[2] = 0.0;
+  // s.centerOfMass = newPosition();
   s.universe_size = universe_size;
   s.node_count = 0;
   return s;
@@ -54,25 +47,25 @@ Tree newTree(Body *bodies, int n) {
   UniverseSize universe_size = getUniverseSize(bodies, n);
   *t.root = newSubnode(&universe_size);
   for (int i = 0; i < n; i++) {
-    Node node = newNode(bodies + i);
-    insertNode(t.root, &node);
+    Body body;
+    insertBody(t.root, &body);
   }
   return t;
 }
 
-void insertNode(Subnode *s, Node *node) {
+void insertBody(Subnode *s, Body *body) {
   if (s->node_count > 1) {
-    Subnode **quadrant = getQuadrant(s, node);
-    insertNode(*quadrant, node);
+    Subnode **quadrant = getQuadrant(s, body);
+    insertBody(*quadrant, body);
   } else if (s->node_count == 1) {
     Subnode **quadrant = getQuadrant(s, s->value);
-    insertNode(*quadrant, s->value);
+    insertBody(*quadrant, s->value);
     s->value = NULL;
 
-    Subnode **quadrant2 = getQuadrant(s, node);
-    insertNode(*quadrant2, node);
+    Subnode **quadrant2 = getQuadrant(s, body);
+    insertBody(*quadrant2, body);
   } else {
-    s->value = node;
+    s->value = body;
   }
   s->node_count++;
 }
@@ -106,15 +99,15 @@ UniverseSize getUniverseSize(Body *bodies, int n) {
   return universe_size;
 }
 
-Subnode **getQuadrant(Subnode *s, Node *node) {
+Subnode **getQuadrant(Subnode *s, Body *body) {
   Subnode **quadrant = NULL;
   UniverseSize new_universe_size;
   memcpy(&new_universe_size, s->universe_size, sizeof(UniverseSize));
-  if (node->pos.z <= (s->universe_size->max_z + s->universe_size->min_z) / 2.0) {
+  if (body->z <= (s->universe_size->max_z + s->universe_size->min_z) / 2.0) {
     new_universe_size.max_z = (s->universe_size->max_z + s->universe_size->min_z) / 2.0;
-    if (node->pos.y <= (s->universe_size->max_y + s->universe_size->min_y) / 2.0) {
+    if (body->y <= (s->universe_size->max_y + s->universe_size->min_y) / 2.0) {
       new_universe_size.max_y = (s->universe_size->max_y + s->universe_size->min_y) / 2.0;
-      if (node->pos.x <= (s->universe_size->max_x + s->universe_size->min_x) / 2.0) {
+      if (body->x <= (s->universe_size->max_x + s->universe_size->min_x) / 2.0) {
         new_universe_size.max_x = (s->universe_size->max_x + s->universe_size->min_x) / 2.0;
         quadrant = &s->childTopNW;
       } else {
@@ -123,7 +116,7 @@ Subnode **getQuadrant(Subnode *s, Node *node) {
       }
     } else {
       new_universe_size.min_y = (s->universe_size->max_y + s->universe_size->min_y) / 2.0;
-      if (node->pos.x <= (s->universe_size->max_x + s->universe_size->min_x) / 2.0) {
+      if (body->x <= (s->universe_size->max_x + s->universe_size->min_x) / 2.0) {
         new_universe_size.max_x = (s->universe_size->max_x + s->universe_size->min_x) / 2.0;
         quadrant = &s->childTopSW;
       } else {
@@ -133,9 +126,9 @@ Subnode **getQuadrant(Subnode *s, Node *node) {
     }
   } else {
     new_universe_size.min_z = (s->universe_size->max_z + s->universe_size->min_z) / 2.0;
-    if (node->pos.y <= (s->universe_size->max_y + s->universe_size->min_y) / 2.0) {
+    if (body->y <= (s->universe_size->max_y + s->universe_size->min_y) / 2.0) {
       new_universe_size.max_y = (s->universe_size->max_y + s->universe_size->min_y) / 2.0;
-      if (node->pos.x <= (s->universe_size->max_x + s->universe_size->min_x) / 2.0) {
+      if (body->x <= (s->universe_size->max_x + s->universe_size->min_x) / 2.0) {
         new_universe_size.max_x = (s->universe_size->max_x + s->universe_size->min_x) / 2.0;
         quadrant = &s->childBottomNW;
       } else {
@@ -144,7 +137,7 @@ Subnode **getQuadrant(Subnode *s, Node *node) {
       }
     } else {
       new_universe_size.min_y = (s->universe_size->max_y + s->universe_size->min_y) / 2.0;
-      if (node->pos.x <= (s->universe_size->max_x + s->universe_size->min_x) / 2.0) {
+      if (body->x <= (s->universe_size->max_x + s->universe_size->min_x) / 2.0) {
         new_universe_size.max_x = (s->universe_size->max_x + s->universe_size->min_x) / 2.0;
         quadrant = &s->childBottomSW;
       } else {
@@ -163,40 +156,38 @@ Subnode **getQuadrant(Subnode *s, Node *node) {
 
 void computeMass(Subnode *s) {
   if (s->node_count == 1) {
-    s->centerOfMass = s->value->pos;
+    s->centerOfMass[0] = s->value->x;
+    s->centerOfMass[1] = s->value->y;
+    s->centerOfMass[2] = s->value->z;
     s->mass = s->value->mass;
   } else {
     s->mass = 0.0;
-    s->centerOfMass = newPosition();
+    s->centerOfMass[0] = 0.0;
+    s->centerOfMass[1] = 0.0;
+    s->centerOfMass[2] = 0.0;
     Subnode *childs[8] = {s->childTopNE, s->childTopNW, s->childTopSE, s->childTopSW, s->childBottomNE, s->childBottomNW, s->childBottomSE, s->childBottomSW};
     for (size_t i = 0; i < 8; i++) {
       computeMass(childs[0]);
       s->mass += childs[0]->value->mass;
-      s->centerOfMass.x += childs[0]->value->pos.x;
-      s->centerOfMass.y += childs[0]->value->pos.y;
-      s->centerOfMass.z += childs[0]->value->pos.z;
+      s->centerOfMass[0] += childs[0]->value->x;
+      s->centerOfMass[1] += childs[0]->value->y;
+      s->centerOfMass[2] += childs[0]->value->z;
     }
-    s->centerOfMass.x /= s->mass;
-    s->centerOfMass.y /= s->mass;
-    s->centerOfMass.z /= s->mass;
-  }
-}
-
-void computeForceForObject(Body *bodies, int n, Subnode *s) {
-  for (int i = 0; i < n; i++) {
-    Position f = computeForceFromTree(bodies + i, s->root)
+    s->centerOfMass[0] /= s->mass;
+    s->centerOfMass[1] /= s->mass;
+    s->centerOfMass[2] /= s->mass;
   }
 }
 
 void computeForceFromTree(Body *object, Subnode *s, double fvec[3]) {
-  double fvec[3];
   if (s->node_count == 1) {
-    computeForce(object, s->body, f);
+    computeForce(*object, *s->value, fvec);
   } else {
-    radius = sqrt(pow(object->x - s->body->x, 2) + pow(object->y - s->body->y, 2) + pow(object->z - s->body->z, 2))
-    height = s->universe_size->max_x - s->universe_size->min_x;
+    double delta = 0.5;
+    double radius = sqrt(pow(object->x - s->value->x, 2) + pow(object->y - s->value->y, 2) + pow(object->z - s->value->z, 2));
+    double height = s->universe_size->max_x - s->universe_size->min_x;
     if (height/radius < delta) {
-      computeForce(object, s->body, f);
+      computeForce(*object, *s->value, fvec);
     } else {
       Subnode *childs[8] = {s->childTopNE, s->childTopNW, s->childTopSE, s->childTopSW, s->childBottomNE, s->childBottomNW, s->childBottomSE, s->childBottomSW};
       for (size_t i = 0; i < 8; i++) {
