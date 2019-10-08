@@ -14,9 +14,10 @@ int main(int argc, char** argv) {
 	int size = 400;
 	int nframes = argc > 2 ? atoi(argv[2]) : 500;
 
-	Universe uni = newCircularUniverse(1000, 250, 30);
+	Universe uni = newSpiralUniverse(n, 250, 30);
+	universeToCsv(uni, "state0.csv");
 
-	printf("\nGalaxySim n-body simulation v0.4\n");
+	printf("\nGalaxySim n-body simulation v0.5\n");
 	printTimestamp();
 
 	printf("Specifications:\n");
@@ -33,7 +34,7 @@ int main(int argc, char** argv) {
 		sprintf(filename, "img/image%04d.pbm", i+1);
 
 		t0 = clock();
-		renderUniverse(uni, filename, size, size, 0, 0, 1);
+		renderUniverse(uni, filename, 0, 0, 1, size, size);
 		t1 = clock();
 		timeRendering += (double)(t1 - t0) / CLOCKS_PER_SEC;
 
@@ -43,6 +44,8 @@ int main(int argc, char** argv) {
 		timeComputing += (double)(t1 - t0) / CLOCKS_PER_SEC;
 	}
 	total1 = clock();
+
+	freeUniverse(uni);
 
 	printf("Done.\n");
 	printf("Time used: %.3fs\n\n", (double)(total1 - total0) / CLOCKS_PER_SEC );

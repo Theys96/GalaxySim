@@ -29,6 +29,5 @@ double bodyDistance(Body a, Body b);
 void computeForce(Body a, Body b, double fvec[3]);
 
 Universe newUniverse(int N);
-Universe newCircularUniverse(int n, int r, int gapSize);
 void iterateNaive(Universe* u, double dt);
 void freeUniverse(Universe u);

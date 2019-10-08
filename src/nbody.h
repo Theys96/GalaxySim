@@ -16,4 +16,8 @@
  *  - cx, cy         : central coordinates of the render, where an object at location (cx,cy) will be rendered at approximatly (width/2, height/2).
  *  - scale          : scaling factor. Defaults to 1 which means a distance of 1 between objects will mean they are rendered at adjacent pixels.
  */
-void renderUniverse(Universe u, char* filename, int width, int height, int cx, int cy, double scale);
+void renderUniverse(Universe u, char* filename, int cx, int cy, double scale, int width, int height);
+void universeToCsv(Universe u, char* filename);
+
+Universe newCircularUniverse(int n, int size, int gapSize);
+Universe newSpiralUniverse(int n, int size, int gapSize);
