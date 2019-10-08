@@ -1,5 +1,5 @@
 make:
-	gcc main.c nbody.c bodies.c image.c -o nbody -O2 --pedantic -Wall
+	gcc main.c nbody.c bodies.c image.c tree.c -o nbody -O2 --pedantic -Wall -lm
 
 clean:
 	rm img/*.pbm
