@@ -12,6 +12,8 @@
 #include <math.h>
 #include <time.h>
 
+#define DELTA_STAR 0.0001
+
 Subnode newSubnode(UniverseSize *universe_size) {
   Subnode s;
   s.childTopNE = NULL;
@@ -53,6 +55,17 @@ void insertBody(Subnode *s, Body *body) {
     s->value->mass = 0;
 
     Subnode **quadrant2 = getQuadrant(s, body);
+    if (*quadrant2 == *quadrant && (*quadrant)->universe_size.max_x - (*quadrant)->universe_size.min_x < DELTA_STAR && (*quadrant)->universe_size.max_y - (*quadrant)->universe_size.min_y < DELTA_STAR && (*quadrant)->universe_size.max_z - (*quadrant)->universe_size.min_z < DELTA_STAR) {
+      Subnode *childs[8] = {s->childTopNE, s->childTopNW, s->childTopSE, s->childTopSW, s->childBottomNE, s->childBottomNW, s->childBottomSE, s->childBottomSW};
+      for (size_t i = 0; i < 8; i++) {
+        if (childs[i] == NULL || childs[i]->node_count == 0) {
+          quadrant2 = childs+i;
+          *quadrant2 = calloc(1, sizeof(Subnode));
+          **quadrant2 = newSubnode(&((*quadrant)->universe_size));
+          break;
+        }
+      }
+    }
     insertBody(*quadrant2, body);
   } else {
     s->value->x = body->x;
