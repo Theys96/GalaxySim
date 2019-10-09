@@ -4,24 +4,36 @@
 #include <stdlib.h>
 #include <time.h>
 
+#define str(x) #x
+#define xstr(x) str(x)
+
+/* PARAMETERS */
+int n = 1000;
+int size = 400;
+int nframes = 500;
+typedef enum { Euler, BarnesHut } Method;
+Method method = Euler;
+
 void printTimestamp();
+void readParameters();
+char* methodString(Method method);
 
 int main(int argc, char** argv) {
-  int n = argc > 1 ? atoi(argv[1]) : 1000;
-  int size = 400;
-  int nframes = argc > 2 ? atoi(argv[2]) : 500;
 
-  Universe uni = newCircularUniverse(n, 250, 30);
-  universeToCsv(uni, "state0.csv");
+  readParameters();
 
-  printf("\nGalaxySim n-body simulation v1.0.1\n");
+  printf("\nGalaxySim n-body simulation v1.2.1\n");
   printTimestamp();
 
   printf("Specifications:\n");
-  printf("\tn = %d\n", n);
-  printf("\timage dimensions = %dx%d\n", size, size);
-  printf("\tframes = %d\n", nframes);
+  printf("\tn                 = %d\n", n);
+  printf("\timage dimensions  = %dx%d\n", size, size);
+  printf("\tframes            = %d\n", nframes);
+  printf("\titeration method  = %s\n", methodString(method));
   printf("\n");
+
+  Universe uni = newCircularUniverse(n, 250, 30);
+  universeToCsv(uni, "state0.csv");
 
   char filename[20];
   clock_t t0, t1, total0, total1;
@@ -36,7 +48,16 @@ int main(int argc, char** argv) {
     timeRendering += (double)(t1 - t0) / CLOCKS_PER_SEC;
 
     t0 = clock();
-    iterateBarnesHut(&uni, 0.02);
+    switch (method) {
+      default:
+      case Euler:
+        iterateEuler(&uni, 0.02);
+        break;
+
+      case BarnesHut:
+        iterateBarnesHut(&uni, 0.02);
+        break;
+    }
     t1 = clock();
     timeComputing += (double)(t1 - t0) / CLOCKS_PER_SEC;
   }
@@ -62,4 +83,40 @@ int main(int argc, char** argv) {
 void printTimestamp() {
   time_t ltime = time(NULL);
   printf("%s\n",asctime(localtime(&ltime)));
+}
+
+void readIntegerParameter(char* question, int* val) {
+  int x;
+  printf("%s", question);
+  printf(" (%d)? ", *val);
+  scanf("%d", &x);
+  *val = x == 0 ? *val : x;
+}
+
+void readParameters() {
+  readIntegerParameter("Number of bodies", &n);
+  readIntegerParameter("Image size", &size);
+  readIntegerParameter("Number of frames", &nframes);
+
+  getchar();
+  char c;
+  printf("Iteration method (e = Euler, b = Barnes-Hut)? ");
+  scanf("%c", &c);
+  switch (c) {
+    default:
+    case 'e':
+      method = Euler; break;
+    case 'b':
+      method = BarnesHut; break;
+  }
+}
+
+char* methodString(Method method) {
+  switch (method) {
+    default:
+    case Euler:
+      return "Euler";
+    case BarnesHut:
+      return "Barnes-Hut";
+  }
 }
