@@ -22,31 +22,23 @@ typedef struct UniverseSize {
 typedef struct Subnode Subnode;
 
 struct Subnode {
-  Subnode *childTopNE;
-  Subnode *childTopNW;
-  Subnode *childTopSE;
-  Subnode *childTopSW;
-  Subnode *childBottomNE;
-  Subnode *childBottomNW;
-  Subnode *childBottomSE;
-  Subnode *childBottomSW;
+  Subnode* children[8];
   Body value;
   UniverseSize universe_size;
   int node_count;
 };
 
-typedef struct Tree {
-	Subnode *root;
-} Tree;
+typedef Subnode* Tree;
 
-Subnode newSubnode();
-Tree newTree(Body *bodies, int n);
+Subnode newSubnode(UniverseSize universe_size);
+Tree newTree(Universe u);
 void freeSubnode(Subnode *s);
-void freeTree(Tree *t);
+void freeTree(Tree t);
 
 void insertBody(Subnode *s, Body body);
-UniverseSize getUniverseSize(Body *bodies, int n);
-Subnode **getQuadrant(Subnode *s, Body body);
+UniverseSize getUniverseSize(Universe u);
+UniverseSize getQuadrantSize(UniverseSize original, int index);
+Subnode *getQuadrant(Subnode *s, Body body);
 
 void computeMass(Subnode *s);
 double max(double a, double b, double c);

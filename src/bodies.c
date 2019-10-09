@@ -73,21 +73,21 @@ void iterateBarnesHut(Universe* u, double dt) {
   Body* b;
 
   // Create Tree and calculate masses of the center of gravities
-  Tree t = newTree(u->bodies, u->n);
-  computeMass(t.root);
+  Tree t = newTree(*u);
+  computeMass(t);
 
   // Update velocities
   for (int i = 0; i < u->n; i++) {
     double fvec[3];
     b = u->bodies + i;
-    computeForceFromTree(*b, t.root, fvec);
+    computeForceFromTree(*b, t, fvec);
     b->dx += dt * f[0]/(b->mass);
     b->dy += dt * f[1]/(b->mass);
     b->dz += dt * f[2]/(b->mass);
   }
 
-  // Free the tree
-  freeTree(&t);
+  // Free the tree 
+  freeTree(t);
 
   for (int i = 0; i < u->n; i++) {
     b = u->bodies + i;

@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
   int size = 400;
   int nframes = argc > 2 ? atoi(argv[2]) : 500;
 
-  Universe uni = newCircularUniverse(1000, 250, 30);
+  Universe uni = newCircularUniverse(n, 250, 30);
 
   printf("\nGalaxySim n-body simulation v1.0.1\n");
   printTimestamp();
@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
     timeRendering += (double)(t1 - t0) / CLOCKS_PER_SEC;
 
     t0 = clock();
-    iterateNaive(&uni, 0.02);
+    iterateBarnesHut(&uni, 0.02);
     t1 = clock();
     timeComputing += (double)(t1 - t0) / CLOCKS_PER_SEC;
   }
