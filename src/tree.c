@@ -68,7 +68,7 @@ void freeTree(Tree t) {
 }
 
 
-
+// Returns a Subnode struct with everything set to 0
 Subnode newSubnode(UniverseSize universe_size) {
   Subnode s;
   for (size_t i = 0; i < 8; i++) {
@@ -80,6 +80,7 @@ Subnode newSubnode(UniverseSize universe_size) {
   return s;
 }
 
+// Frees a subnode and all of its children
 void freeSubnode(Subnode *s) {
   for (size_t i = 0; i < 8; i++) {
     if (s->children[i] != NULL) {
@@ -89,12 +90,20 @@ void freeSubnode(Subnode *s) {
   free(s);
 }
 
+/* Adds a body to tree. 3 cases are possible:
+ * 1. The node is empty. The body is simply added as the node's value.
+ * 2. The node has a single body as its value. The two bodies must both be added to their own quadrant child of this node.
+ * 3. The node already has multiple bodies in it. The node must simply be added to the correct quadrant child.
+ */
 void insertBody(Subnode *s, Body body) {
+  // Case 3
   if (s->node_count > 1) {
     Subnode *quadrant = getQuadrant(s, body);
     insertBody(quadrant, body);
+
+  // Case 2
   } else if (s->node_count == 1) {
-    // If two bodies are very close to each other, we regard them as one mass
+    // If two bodies are very close to each other, we regard them as one mass.
     if (bodyDistance(s->value, body) < DELTA_STAR) {
       s->value.mass += body.mass;
     } 
@@ -107,15 +116,19 @@ void insertBody(Subnode *s, Body body) {
 
       s->value = newBody(0,0,0,0,0,0,0);
     }
+
+  // Case 1
   } else {
     s->value = body;
   }
+
+  // In any case, increment the count of bodies in this node.
   s->node_count++;
 }
 
+// Given a Universe object (with n bodies), compute its outer bounds base on the furthest outlying bodies.
 UniverseSize getUniverseSize(Universe u) {
   UniverseSize sz;
-
   sz.min_x = u.bodies[0].x;
   sz.max_x = u.bodies[0].x;
   sz.min_y = u.bodies[0].y;
@@ -130,10 +143,10 @@ UniverseSize getUniverseSize(Universe u) {
     sz.min_z = u.bodies[i].z < sz.min_z ? u.bodies[i].z : sz.min_z;
     sz.max_z = u.bodies[i].z > sz.max_z ? u.bodies[i].z : sz.max_z;
   }
-
   return sz;
 }
 
+// Retrieve the bounds of the specified child quadrant (by index) of the parent's bounds
 UniverseSize getQuadrantSize(UniverseSize original, int index) {
   UniverseSize sz = original;
   if (index & 1) {
@@ -154,6 +167,9 @@ UniverseSize getQuadrantSize(UniverseSize original, int index) {
   return sz;
 }
 
+/* Returns the child quadrant a body should be added to, based on its coordinates.
+ * If necessary, instantiates this quadrant.
+ */ 
 Subnode *getQuadrant(Subnode *s, Body body) {
   UniverseSize sz = s->size;
   int index = 
@@ -169,6 +185,10 @@ Subnode *getQuadrant(Subnode *s, Body body) {
   return s->children[index];
 }
 
+/* Makes sure the 'value' or center of mas of a subnode is correctly computed.
+ * In the case of a quadrant with multiple nodes, it must be computed as the
+ * center of mass of its child quadrants.
+ */
 void computeMass(Subnode *s) {
   // Only for nodes with more than 1 body an operation is required
   if (s->node_count > 1) {
@@ -187,6 +207,7 @@ void computeMass(Subnode *s) {
     }
   }
 }
+
 
 double max(double a, double b, double c) {
   double result = (a > b) ? a : b;

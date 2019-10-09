@@ -13,6 +13,18 @@
 #include <time.h>
 #define G 1
 
+Body newBody(double x, double y, double z, double dx, double dy, double dz, double mass) {
+  Body b;
+  b.x = x;
+  b.y = y;
+  b.z = z;
+  b.dx = dx;
+  b.dy = dy;
+  b.dz = dz;
+  b.mass = mass;
+  return b;
+}
+
 double bodyDistance(Body a, Body b) {
   return sqrt(pow(b.x - a.x,2) + pow(b.y - a.y,2) + pow(b.z - a.z,2));
 }
@@ -26,17 +38,6 @@ void computeForce(Body a, Body b, double fvec[3]) {
   fvec[2] = (b.z - a.z)/dist * f;
 }
 
-Body newBody(double x, double y, double z, double dx, double dy, double dz, double mass) {
-  Body b;
-  b.x = x;
-  b.y = y;
-  b.z = z;
-  b.dx = dx;
-  b.dy = dy;
-  b.dz = dz;
-  b.mass = mass;
-  return b;
-}
 
 Universe newUniverse(int n) {
   Universe u;
@@ -47,6 +48,11 @@ Universe newUniverse(int n) {
   }
   return u;
 }
+
+void freeUniverse(Universe u) {
+  free(u.bodies);
+}
+
 
 void iterateEuler(Universe* u, double dt) {
   
@@ -102,9 +108,5 @@ void iterateBarnesHut(Universe* u, double dt) {
     b->y += dt * b->dy;
     b->z += dt * b->dz;
   }
-}
-
-void freeUniverse(Universe u) {
-  free(u.bodies);
 }
 

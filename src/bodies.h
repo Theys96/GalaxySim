@@ -26,15 +26,59 @@ typedef struct Universe {
     int n;
 } Universe;
 
+/* Returns Body struct with the specified parameters.
+ * Inputs:
+ *  - x, y, z      : Cartesian coordinates of the body
+ *  - dx, dy, dz   : Velocity vector of the body
+ *  - mass         : Mass of the body
+ */
 Body newBody(double x, double y, double z, double dx, double dy, double dz, double mass);
+
+/* Computes the distance between two given bodies.
+ * Inputs:
+ *  - a, b         : Bodies between which the distance is computed.
+ */
 double bodyDistance(Body a, Body b);
+
+/* Computes the (gravity) force between two bodies.
+ * The returned force vector is for Body a. For Body b
+ * it is its exact opposite (negated).
+ * Inputs:
+ *  - a            : Body on which the force is exerted.
+ *  - b            : Body which exerts the force.
+ */
 void computeForce(Body a, Body b, double fvec[3]);
 
+
+/* Returns a new Universe struct with N bodies in it,
+ * already allocated.
+ * Inputs:
+ *  - N            : Number of bodies allocated in the universe.
+ */
 Universe newUniverse(int N);
 
-void iterateEuler(Universe* u, double dt);
-void iterateBarnesHut(Universe* u, double dt);
-
+/* Frees a universe struct (all of its bodies).
+ * Inputs:
+ *  - u            : Universe struct to free.
+ */
 void freeUniverse(Universe u);
+
+
+/* Iterates the universe state u to a next state with
+ * timestep `dt` using the naive Eulerean method.
+ * Inputs:
+ *  - u            : pointer to the universe state to iterate on.
+ *  - dt           : timestep to use for iteration.
+ */
+void iterateEuler(Universe* u, double dt);
+
+/* Iterates the universe state u to a next state with
+ * timestep `dt` using the naive Eulerean method in
+ * combination with the Barnes-Hut algorithm.
+ * Inputs:
+ *  - u            : pointer to the universe state to iterate on.
+ *  - dt           : timestep to use for iteration.
+ */
+void iterateBarnesHut(Universe* u, double dt);
 
 #endif
