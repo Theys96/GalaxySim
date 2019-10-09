@@ -26,17 +26,16 @@ void setPixel(Image img, int x, int y, int val) {
 }
 
 void saveImage(Image img, char* filename) {
-  FILE* pgmimg; 
-    pgmimg = fopen(filename, "wb"); 
+  FILE* pgmimg = fopen(filename, "wb"); 
 
-    fprintf(pgmimg, "P4\n");                // Magic bytes
+    fprintf(pgmimg, "P4\n");                              // Magic bytes
     fprintf(pgmimg, "%d %d\n", img.width, img.height);    // Dimensions
-    for (int i = 0; i < img.height; i++) { 
+    for (int i = 0; i < img.height; i++) {
         for (int j = 0; j < img.bytewidth ; j++) {
             fprintf(pgmimg, "%c", img.img[i][j]); 
-        } 
-        //fprintf(pgmimg, "\n"); 
+        }
     }
+    fprintf(pgmimg, "\n");
     fclose(pgmimg); 
 }
 

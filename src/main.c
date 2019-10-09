@@ -4,18 +4,15 @@
 #include <stdlib.h>
 #include <time.h>
 
-void printTimestamp() {
-  time_t ltime = time(NULL);
-  printf("%s\n",asctime(localtime(&ltime)));
-}
+void printTimestamp();
 
 int main(int argc, char** argv) {
-  
   int n = argc > 1 ? atoi(argv[1]) : 1000;
   int size = 400;
   int nframes = argc > 2 ? atoi(argv[2]) : 500;
 
   Universe uni = newCircularUniverse(n, 250, 30);
+  universeToCsv(uni, "state0.csv");
 
   printf("\nGalaxySim n-body simulation v1.0.1\n");
   printTimestamp();
@@ -34,7 +31,7 @@ int main(int argc, char** argv) {
     sprintf(filename, "img/image%04d.pbm", i+1);
 
     t0 = clock();
-    renderUniverse(uni, filename, size, size, 0, 0, 1);
+    renderUniverse(uni, filename, 0, 0, 1, size, size);
     t1 = clock();
     timeRendering += (double)(t1 - t0) / CLOCKS_PER_SEC;
 
@@ -55,4 +52,14 @@ int main(int argc, char** argv) {
   printf("\t%.3fs total for %d frames\n", timeComputing, nframes);
   printf("\t%.3fms on average\n", timeComputing / nframes * 1000 );
   printf("\n");
+
+  return 0;
+}
+
+
+/* HELPER FUNCTIONS */
+
+void printTimestamp() {
+  time_t ltime = time(NULL);
+  printf("%s\n",asctime(localtime(&ltime)));
 }

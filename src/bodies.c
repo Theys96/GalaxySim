@@ -48,25 +48,6 @@ Universe newUniverse(int n) {
   return u;
 }
 
-Universe newCircularUniverse(int n, int size, int gapSize) {
-  Universe u;
-  u.n = n;
-
-  srand(time(NULL));
-  u.bodies = calloc(n, sizeof(Body));
-  u.bodies[0] = newBody(0, 0, 0, 0, 0, 0, 1000*u.n);
-
-  double theta, r, ov, mass = 1000*u.n+10;
-  for (int i = 1; i < u.n; i++) {
-    theta = rand() % 360;
-    r = gapSize + (rand() % (size - gapSize));
-    ov = sqrt(mass/r);
-    u.bodies[i] = newBody(r*cos(theta), r*sin(theta), 0, -ov*sin(theta), ov*cos(theta), 0, 10);
-  }
-
-  return u;
-}
-
 void iterateEuler(Universe* u, double dt) {
   
   // Update velocities
@@ -93,6 +74,7 @@ void iterateEuler(Universe* u, double dt) {
     b->y += dt * b->dy;
     b->z += dt * b->dz;
   }
+
 }
 
 void iterateBarnesHut(Universe* u, double dt) {
