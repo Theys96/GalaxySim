@@ -50,5 +50,6 @@ UniverseSize getUniverseSize(Body *bodies, int n);
 Subnode **getQuadrant(Subnode *s, Body *body);
 
 void computeMass(Subnode *s);
+double max(double a, double b, double c);
 void computeForceFromTree(Body *object, Subnode *s, double fvec[3]);
 #endif

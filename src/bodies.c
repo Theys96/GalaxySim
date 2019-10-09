@@ -12,17 +12,17 @@
 #include <time.h>
 #define G 1
 
-double bodyDistance(Body a, Body b) {
-   return sqrt(pow(b.x - a.x,2) + pow(b.y - a.y,2) + pow(b.z - a.z,2));
+double bodyDistance(Body *a, Body *b) {
+   return sqrt(pow(b->x - a->x,2) + pow(b->y - a->y,2) + pow(b->z - a->z,2));
 }
 
-void computeForce(Body a, Body b, double fvec[3]) {
+void computeForce(Body *a, Body *b, double fvec[3]) {
 	float dist = bodyDistance(a,b);
 	if (dist < 1) { dist = 1; }
-	int f = G * a.mass * b.mass / (dist*dist);
-	fvec[0] = (b.x - a.x)/dist * f;
-	fvec[1] = (b.y - a.y)/dist * f;
-	fvec[2] = (b.z - a.z)/dist * f;
+	int f = G * a->mass * b->mass / (dist*dist);
+	fvec[0] = (b->x - a->x)/dist * f;
+	fvec[1] = (b->y - a->y)/dist * f;
+	fvec[2] = (b->z - a->z)/dist * f;
 }
 
 Body newBody(double x, double y, double z, double dx, double dy, double dz, double mass) {
@@ -93,7 +93,7 @@ void iterateNaive(Universe* u, double dt) {
 	// 	b = u->bodies + i;
 	// 	for (int j = i+1; j < u->n; j++) {
 	// 		c = u->bodies + j;
-	// 		computeForce(*b, *c, f);
+	// 		computeForce(b, c, f);
 	// 		b->dx += dt * f[0]/(b->mass);
 	// 		b->dy += dt * f[1]/(b->mass);
 	// 		b->dz += dt * f[2]/(b->mass);

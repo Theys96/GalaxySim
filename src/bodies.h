@@ -28,8 +28,8 @@ typedef struct Universe {
 } Universe;
 
 Body newBody(double x, double y, double z, double dx, double dy, double dz, double mass);
-double bodyDistance(Body a, Body b);
-void computeForce(Body a, Body b, double fvec[3]);
+double bodyDistance(Body *a, Body *b);
+void computeForce(Body *a, Body *b, double fvec[3]);
 
 Universe newUniverse(int N);
 Universe newCircularUniverse(int n, int r, int gapSize);

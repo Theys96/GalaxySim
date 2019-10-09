@@ -204,14 +204,20 @@ void computeMass(Subnode *s) {
   }
 }
 
+double max(double a, double b, double c) {
+  double result = (a > b) ? a : b;
+  result = (result > c) ? result : c;
+  return result;
+}
+
 void computeForceFromTree(Body *object, Subnode *s, double fvec[3]) {
   if (s->node_count == 1) {
-    computeForce(*object, *s->value, fvec);
+    computeForce(object, s->value, fvec);
   } else {
-    double radius = sqrt(pow(object->x - s->value->x, 2) + pow(object->y - s->value->y, 2) + pow(object->z - s->value->z, 2));
-    double height = s->universe_size.max_x - s->universe_size.min_x;
+    double radius = bodyDistance(object, s->value);
+    double height = max(s->universe_size.max_x - s->universe_size.min_x, s->universe_size.max_y - s->universe_size.min_y, s->universe_size.max_z - s->universe_size.min_z);
     if (height/radius < DELTA_BARNES_HUT) {
-      computeForce(*object, *s->value, fvec);
+      computeForce(object, s->value, fvec);
     } else {
       Subnode *childs[8] = {s->childTopNE, s->childTopNW, s->childTopSE, s->childTopSW, s->childBottomNE, s->childBottomNW, s->childBottomSE, s->childBottomSW};
       // compute the forces for all child cubic cells
