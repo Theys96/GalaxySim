@@ -10,29 +10,32 @@
 
 #ifndef BODIES_H
 #define BODIES_H 1
-#include "tree.h"
 
 typedef struct Body {
-	double x;
-	double y;
-	double z;
-	double dx;
-	double dy;
-	double dz;
-	double mass;
+  double x;
+  double y;
+  double z;
+  double dx;
+  double dy;
+  double dz;
+  double mass;
 } Body;
 
 typedef struct Universe {
-	Body* bodies;
-	int n;
+    Body* bodies;
+    int n;
 } Universe;
 
 Body newBody(double x, double y, double z, double dx, double dy, double dz, double mass);
-double bodyDistance(Body *a, Body *b);
-void computeForce(Body *a, Body *b, double fvec[3]);
+double bodyDistance(Body a, Body b);
+void computeForce(Body a, Body b, double fvec[3]);
 
 Universe newUniverse(int N);
 Universe newCircularUniverse(int n, int r, int gapSize);
+
+void iterateBarnesHut(Universe* u, double dt);
 void iterateNaive(Universe* u, double dt);
+
 void freeUniverse(Universe u);
+
 #endif

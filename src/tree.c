@@ -5,7 +5,6 @@
  * Code file for tree.c
  */
 
-
 #include "tree.h"
 #include <string.h>
 #include <stdlib.h>
@@ -25,8 +24,7 @@ Subnode newSubnode(UniverseSize *universe_size) {
   s.childBottomNW = NULL;
   s.childBottomSE = NULL;
   s.childBottomSW = NULL;
-  s.value = calloc(1, sizeof(Body));
-  *(s.value) = newBody(0,0,0,0,0,0,0);
+  s.value = newBody(0,0,0,0,0,0,0);
   s.universe_size = *universe_size;
   s.node_count = 0;
   return s;
@@ -38,7 +36,7 @@ Tree newTree(Body *bodies, int n) {
   UniverseSize universe_size = getUniverseSize(bodies, n);
   *t.root = newSubnode(&universe_size);
   for (int i = 0; i < n; i++) {
-    insertBody(t.root, bodies + i);
+    insertBody(t.root, bodies[i]);
   }
   return t;
 }
@@ -50,7 +48,6 @@ void freeSubnode(Subnode *s) {
       freeSubnode(childs[i]);
     }
   }
-  free(s->value);
   free(s);
 }
 
@@ -58,17 +55,17 @@ void freeTree(Tree *t) {
   freeSubnode(t->root);
 }
 
-void insertBody(Subnode *s, Body *body) {
+void insertBody(Subnode *s, Body body) {
   if (s->node_count > 1) {
     Subnode **quadrant = getQuadrant(s, body);
     insertBody(*quadrant, body);
   } else if (s->node_count == 1) {
     Subnode **quadrant = getQuadrant(s, s->value);
     insertBody(*quadrant, s->value);
-    s->value->x = 0;
-    s->value->y = 0;
-    s->value->z = 0;
-    s->value->mass = 0;
+    (s->value).x = 0;
+    (s->value).y = 0;
+    (s->value).z = 0;
+    (s->value).mass = 0;
 
     Subnode **quadrant2 = getQuadrant(s, body);
     // change the cubic cell to prevent infinity recursive call for bodies
@@ -86,10 +83,7 @@ void insertBody(Subnode *s, Body *body) {
     }
     insertBody(*quadrant2, body);
   } else {
-    s->value->x = body->x;
-    s->value->y = body->y;
-    s->value->z = body->z;
-    s->value->mass = body->mass;
+    s->value = body;
   }
   s->node_count++;
 }
@@ -123,15 +117,15 @@ UniverseSize getUniverseSize(Body *bodies, int n) {
   return universe_size;
 }
 
-Subnode **getQuadrant(Subnode *s, Body *body) {
+Subnode **getQuadrant(Subnode *s, Body body) {
   Subnode **quadrant = NULL;
   UniverseSize new_universe_size;
   memcpy(&new_universe_size, &(s->universe_size), sizeof(UniverseSize));
-  if (body->z <= (s->universe_size.max_z + s->universe_size.min_z) / 2.0) {
+  if (body.z <= (s->universe_size.max_z + s->universe_size.min_z) / 2.0) {
     new_universe_size.max_z = (s->universe_size.max_z + s->universe_size.min_z) / 2.0;
-    if (body->y <= (s->universe_size.max_y + s->universe_size.min_y) / 2.0) {
+    if (body.y <= (s->universe_size.max_y + s->universe_size.min_y) / 2.0) {
       new_universe_size.max_y = (s->universe_size.max_y + s->universe_size.min_y) / 2.0;
-      if (body->x <= (s->universe_size.max_x + s->universe_size.min_x) / 2.0) {
+      if (body.x <= (s->universe_size.max_x + s->universe_size.min_x) / 2.0) {
         new_universe_size.max_x = (s->universe_size.max_x + s->universe_size.min_x) / 2.0;
         quadrant = &s->childTopNW;
       } else {
@@ -140,7 +134,7 @@ Subnode **getQuadrant(Subnode *s, Body *body) {
       }
     } else {
       new_universe_size.min_y = (s->universe_size.max_y + s->universe_size.min_y) / 2.0;
-      if (body->x <= (s->universe_size.max_x + s->universe_size.min_x) / 2.0) {
+      if (body.x <= (s->universe_size.max_x + s->universe_size.min_x) / 2.0) {
         new_universe_size.max_x = (s->universe_size.max_x + s->universe_size.min_x) / 2.0;
         quadrant = &s->childTopSW;
       } else {
@@ -150,9 +144,9 @@ Subnode **getQuadrant(Subnode *s, Body *body) {
     }
   } else {
     new_universe_size.min_z = (s->universe_size.max_z + s->universe_size.min_z) / 2.0;
-    if (body->y <= (s->universe_size.max_y + s->universe_size.min_y) / 2.0) {
+    if (body.y <= (s->universe_size.max_y + s->universe_size.min_y) / 2.0) {
       new_universe_size.max_y = (s->universe_size.max_y + s->universe_size.min_y) / 2.0;
-      if (body->x <= (s->universe_size.max_x + s->universe_size.min_x) / 2.0) {
+      if (body.x <= (s->universe_size.max_x + s->universe_size.min_x) / 2.0) {
         new_universe_size.max_x = (s->universe_size.max_x + s->universe_size.min_x) / 2.0;
         quadrant = &s->childBottomNW;
       } else {
@@ -161,7 +155,7 @@ Subnode **getQuadrant(Subnode *s, Body *body) {
       }
     } else {
       new_universe_size.min_y = (s->universe_size.max_y + s->universe_size.min_y) / 2.0;
-      if (body->x <= (s->universe_size.max_x + s->universe_size.min_x) / 2.0) {
+      if (body.x <= (s->universe_size.max_x + s->universe_size.min_x) / 2.0) {
         new_universe_size.max_x = (s->universe_size.max_x + s->universe_size.min_x) / 2.0;
         quadrant = &s->childBottomSW;
       } else {
@@ -181,25 +175,22 @@ Subnode **getQuadrant(Subnode *s, Body *body) {
 
 void computeMass(Subnode *s) {
   if (s->node_count > 1) {
-    s->value->mass = 0.0;
-    s->value->x = 0.0;
-    s->value->y = 0.0;
-    s->value->z = 0.0;
+    s->value = newBody(0,0,0,0,0,0,0);
     Subnode *childs[8] = {s->childTopNE, s->childTopNW, s->childTopSE, s->childTopSW, s->childBottomNE, s->childBottomNW, s->childBottomSE, s->childBottomSW};
     // calculate the mass dependent on all child cubic cells
     for (size_t i = 0; i < 8; i++) {
       if (childs[i] != NULL) {
         computeMass(childs[i]);
-        s->value->mass += childs[i]->value->mass;
-        s->value->x += childs[i]->value->x;
-        s->value->y += childs[i]->value->y;
-        s->value->z += childs[i]->value->z;
+        s->value.mass += childs[i]->value.mass;
+        s->value.x += childs[i]->value.x;
+        s->value.y += childs[i]->value.y;
+        s->value.z += childs[i]->value.z;
       }
     }
-    if (s->value->mass > 0.0) {
-      s->value->x /= s->value->mass;
-      s->value->x /= s->value->mass;
-      s->value->x /= s->value->mass;
+    if (s->value.mass > 0.0) {
+      s->value.x /= s->value.mass;
+      s->value.x /= s->value.mass;
+      s->value.x /= s->value.mass;
     }
   }
 }
@@ -210,7 +201,7 @@ double max(double a, double b, double c) {
   return result;
 }
 
-void computeForceFromTree(Body *object, Subnode *s, double fvec[3]) {
+void computeForceFromTree(Body object, Subnode *s, double fvec[3]) {
   if (s->node_count == 1) {
     computeForce(object, s->value, fvec);
   } else {

@@ -7,9 +7,8 @@
 
 #ifndef TREE_H
 #define TREE_H 1
-#include "bodies.h"
 
-typedef struct Body Body;
+#include "bodies.h"
 
 typedef struct UniverseSize {
   double min_x;
@@ -31,7 +30,7 @@ struct Subnode {
   Subnode *childBottomNW;
   Subnode *childBottomSE;
   Subnode *childBottomSW;
-  Body *value;
+  Body value;
   UniverseSize universe_size;
   int node_count;
 };
@@ -45,11 +44,12 @@ Tree newTree(Body *bodies, int n);
 void freeSubnode(Subnode *s);
 void freeTree(Tree *t);
 
-void insertBody(Subnode *t, Body *body);
+void insertBody(Subnode *s, Body body);
 UniverseSize getUniverseSize(Body *bodies, int n);
-Subnode **getQuadrant(Subnode *s, Body *body);
+Subnode **getQuadrant(Subnode *s, Body body);
 
 void computeMass(Subnode *s);
 double max(double a, double b, double c);
-void computeForceFromTree(Body *object, Subnode *s, double fvec[3]);
+void computeForceFromTree(Body object, Subnode *s, double fvec[3]);
+
 #endif
