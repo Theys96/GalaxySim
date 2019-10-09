@@ -2,10 +2,10 @@
 typedef char byte;
 
 typedef struct Image {
-	int width;
-	int height;
-	int bytewidth;
-	byte** img;
+  int width;
+  int height;
+  int bytewidth;
+  byte** img;
 } Image;
 
 Image newImage(int width, int height);

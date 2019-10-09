@@ -8,20 +8,22 @@
  * It can exert a gravity force on other Bodies which can be computed by the given function.
  */
 
+#ifndef BODIES_H
+#define BODIES_H 1
 
 typedef struct Body {
-	double x;
-	double y;
-	double z;
-	double dx;
-	double dy;
-	double dz;
-	double mass;
+  double x;
+  double y;
+  double z;
+  double dx;
+  double dy;
+  double dz;
+  double mass;
 } Body;
 
 typedef struct Universe {
-	Body* bodies;
-	int n;
+    Body* bodies;
+    int n;
 } Universe;
 
 Body newBody(double x, double y, double z, double dx, double dy, double dz, double mass);
@@ -29,6 +31,10 @@ double bodyDistance(Body a, Body b);
 void computeForce(Body a, Body b, double fvec[3]);
 
 Universe newUniverse(int N);
-Universe newCircularUniverse(int n, int r, int gapSize);
-void iterateNaive(Universe* u, double dt);
+
+void iterateEuler(Universe* u, double dt);
+void iterateBarnesHut(Universe* u, double dt);
+
 void freeUniverse(Universe u);
+
+#endif
