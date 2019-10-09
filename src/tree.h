@@ -40,9 +40,10 @@ typedef struct Tree {
 	Subnode *root;
 } Tree;
 
-// Position newPosition();
 Subnode newSubnode();
 Tree newTree(Body *bodies, int n);
+void freeSubnode(Subnode *s);
+void freeTree(Tree *t);
 
 void insertBody(Subnode *t, Body *body);
 UniverseSize getUniverseSize(Body *bodies, int n);

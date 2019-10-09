@@ -85,6 +85,9 @@ void iterateNaive(Universe* u, double dt) {
     b->dz += dt * f[2]/(b->mass);
   }
 
+  // Free the tree
+  freeTree(&t);
+
 	// // Update velocities
 	// for (int i = 0; i < u->n; i++) {
 	// 	b = u->bodies + i;

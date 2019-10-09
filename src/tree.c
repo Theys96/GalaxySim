@@ -13,6 +13,7 @@
 #include <time.h>
 
 #define DELTA_STAR 0.0001
+#define DELTA_BARNES_HUT 0.5
 
 Subnode newSubnode(UniverseSize *universe_size) {
   Subnode s;
@@ -42,6 +43,21 @@ Tree newTree(Body *bodies, int n) {
   return t;
 }
 
+void freeSubnode(Subnode *s) {
+  Subnode *childs[8] = {s->childTopNE, s->childTopNW, s->childTopSE, s->childTopSW, s->childBottomNE, s->childBottomNW, s->childBottomSE, s->childBottomSW};
+  for (size_t i = 0; i < 8; i++) {
+    if (childs[i] != NULL) {
+      freeSubnode(childs[i]);
+    }
+  }
+  free(s->value);
+  free(s);
+}
+
+void freeTree(Tree *t) {
+  freeSubnode(t->root);
+}
+
 void insertBody(Subnode *s, Body *body) {
   if (s->node_count > 1) {
     Subnode **quadrant = getQuadrant(s, body);
@@ -55,6 +71,8 @@ void insertBody(Subnode *s, Body *body) {
     s->value->mass = 0;
 
     Subnode **quadrant2 = getQuadrant(s, body);
+    // change the cubic cell to prevent infinity recursive call for bodies
+    // which are very close to each other.
     if (*quadrant2 == *quadrant && (*quadrant)->universe_size.max_x - (*quadrant)->universe_size.min_x < DELTA_STAR && (*quadrant)->universe_size.max_y - (*quadrant)->universe_size.min_y < DELTA_STAR && (*quadrant)->universe_size.max_z - (*quadrant)->universe_size.min_z < DELTA_STAR) {
       Subnode *childs[8] = {s->childTopNE, s->childTopNW, s->childTopSE, s->childTopSW, s->childBottomNE, s->childBottomNW, s->childBottomSE, s->childBottomSW};
       for (size_t i = 0; i < 8; i++) {
@@ -152,6 +170,7 @@ Subnode **getQuadrant(Subnode *s, Body *body) {
       }
     }
   }
+  // create a new subnode for an empty child
   if (*quadrant == NULL) {
     *quadrant = calloc(1, sizeof(Subnode));
     **quadrant = newSubnode(&new_universe_size);
@@ -167,6 +186,7 @@ void computeMass(Subnode *s) {
     s->value->y = 0.0;
     s->value->z = 0.0;
     Subnode *childs[8] = {s->childTopNE, s->childTopNW, s->childTopSE, s->childTopSW, s->childBottomNE, s->childBottomNW, s->childBottomSE, s->childBottomSW};
+    // calculate the mass dependent on all child cubic cells
     for (size_t i = 0; i < 8; i++) {
       if (childs[i] != NULL) {
         computeMass(childs[i]);
@@ -188,13 +208,13 @@ void computeForceFromTree(Body *object, Subnode *s, double fvec[3]) {
   if (s->node_count == 1) {
     computeForce(*object, *s->value, fvec);
   } else {
-    double delta = 0.5;
     double radius = sqrt(pow(object->x - s->value->x, 2) + pow(object->y - s->value->y, 2) + pow(object->z - s->value->z, 2));
     double height = s->universe_size.max_x - s->universe_size.min_x;
-    if (height/radius < delta) {
+    if (height/radius < DELTA_BARNES_HUT) {
       computeForce(*object, *s->value, fvec);
     } else {
       Subnode *childs[8] = {s->childTopNE, s->childTopNW, s->childTopSE, s->childTopSW, s->childBottomNE, s->childBottomNW, s->childBottomSE, s->childBottomSW};
+      // compute the forces for all child cubic cells
       for (size_t i = 0; i < 8; i++) {
         if (childs[i] != NULL) {
           double fsubvec[3];
