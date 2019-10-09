@@ -34,7 +34,6 @@ void renderUniverse(Universe u, char* filename, int cx, int cy, double scale, in
   freeImage(img);
 }
 
-
 void universeToCsv(Universe u, char* filename) {
   FILE* file = fopen(filename, "wb");
   fprintf(file, "i,x,y,z,r,theta\n");
@@ -50,6 +49,7 @@ void universeToCsv(Universe u, char* filename) {
   }
   fclose(file); 
 }
+
 
 Universe newCircularUniverse(int n, int size, int gapSize) {
   Universe u;

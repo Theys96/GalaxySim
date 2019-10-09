@@ -1,11 +1,12 @@
 # Mac OS X
-
 .DS_Store
-
 
 #images
 *.pgm
 *.pbm
+
+#data
+*.csv
 
 #binaries
 src/nbody
