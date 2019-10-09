@@ -33,8 +33,8 @@ void computeForce(Body a, Body b, double fvec[3]);
 Universe newUniverse(int N);
 Universe newCircularUniverse(int n, int r, int gapSize);
 
+void iterateEuler(Universe* u, double dt);
 void iterateBarnesHut(Universe* u, double dt);
-void iterateNaive(Universe* u, double dt);
 
 void freeUniverse(Universe u);
 

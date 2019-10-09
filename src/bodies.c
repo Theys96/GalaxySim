@@ -67,41 +67,11 @@ Universe newCircularUniverse(int n, int size, int gapSize) {
   return u;
 }
 
-void iterateBarnesHut(Universe* u, double dt) {
-  double f[3];
-  // Body *b, *c;
-  Body* b;
-
-  // Create Tree and calculate masses of the center of gravities
-  Tree t = newTree(*u);
-  computeMass(t);
-
+void iterateEuler(Universe* u, double dt) {
+  
   // Update velocities
-  for (int i = 0; i < u->n; i++) {
-    double fvec[3];
-    b = u->bodies + i;
-    computeForceFromTree(*b, t, fvec);
-    b->dx += dt * f[0]/(b->mass);
-    b->dy += dt * f[1]/(b->mass);
-    b->dz += dt * f[2]/(b->mass);
-  }
-
-  // Free the tree 
-  freeTree(t);
-
-  for (int i = 0; i < u->n; i++) {
-    b = u->bodies + i;
-    b->x += dt * b->dx;
-    b->y += dt * b->dy;
-    b->z += dt * b->dz;
-  }
-}
-
-void iterateNaive(Universe* u, double dt) {
-  double f[3];
   Body *b, *c;
-
-  // Update velocities
+  double f[3];
   for (int i = 0; i < u->n; i++) {
     b = u->bodies + i;
     for (int j = i+1; j < u->n; j++) {
@@ -117,6 +87,33 @@ void iterateNaive(Universe* u, double dt) {
   }
 
   // Update locations
+  for (int i = 0; i < u->n; i++) {
+    b = u->bodies + i;
+    b->x += dt * b->dx;
+    b->y += dt * b->dy;
+    b->z += dt * b->dz;
+  }
+}
+
+void iterateBarnesHut(Universe* u, double dt) {
+
+  // Create Tree
+  Tree t = newTree(*u);
+
+  // Update velocities
+  Body* b;
+  double f[3];
+  for (int i = 0; i < u->n; i++) {
+    b = u->bodies + i;
+    computeForceFromTree(*b, t, f);
+    b->dx += dt * f[0]/(b->mass);
+    b->dy += dt * f[1]/(b->mass);
+    b->dz += dt * f[2]/(b->mass);
+  }
+
+  // Free the tree 
+  freeTree(t);
+
   for (int i = 0; i < u->n; i++) {
     b = u->bodies + i;
     b->x += dt * b->dx;

@@ -33,6 +33,9 @@ Tree newTree(Universe u) {
   for (int i = 0; i < u.n; i++) {
     insertBody(t, u.bodies[i]);
   }
+
+  computeMass(t);
+
   return t;
 }
 
@@ -135,62 +138,6 @@ Subnode *getQuadrant(Subnode *s, Body body) {
   }
 
   return s->children[index];
-
-  /*
-  Subnode **quadrant = NULL;
-  UniverseSize new_universe_size = s->universe_size;
-
-  if (body.z <= (s->universe_size.max_z + s->universe_size.min_z) / 2.0) {
-    new_universe_size.max_z = (s->universe_size.max_z + s->universe_size.min_z) / 2.0;
-    if (body.y <= (s->universe_size.max_y + s->universe_size.min_y) / 2.0) {
-      new_universe_size.max_y = (s->universe_size.max_y + s->universe_size.min_y) / 2.0;
-      if (body.x <= (s->universe_size.max_x + s->universe_size.min_x) / 2.0) {
-        new_universe_size.max_x = (s->universe_size.max_x + s->universe_size.min_x) / 2.0;
-        quadrant = &s->childTopNW;
-      } else {
-        new_universe_size.min_x = (s->universe_size.max_x + s->universe_size.min_x) / 2.0;
-        quadrant = &s->childTopNE;
-      }
-    } else {
-      new_universe_size.min_y = (s->universe_size.max_y + s->universe_size.min_y) / 2.0;
-      if (body.x <= (s->universe_size.max_x + s->universe_size.min_x) / 2.0) {
-        new_universe_size.max_x = (s->universe_size.max_x + s->universe_size.min_x) / 2.0;
-        quadrant = &s->childTopSW;
-      } else {
-        new_universe_size.min_x = (s->universe_size.max_x + s->universe_size.min_x) / 2.0;
-        quadrant = &s->childTopSE;
-      }
-    }
-  } else {
-    new_universe_size.min_z = (s->universe_size.max_z + s->universe_size.min_z) / 2.0;
-    if (body.y <= (s->universe_size.max_y + s->universe_size.min_y) / 2.0) {
-      new_universe_size.max_y = (s->universe_size.max_y + s->universe_size.min_y) / 2.0;
-      if (body.x <= (s->universe_size.max_x + s->universe_size.min_x) / 2.0) {
-        new_universe_size.max_x = (s->universe_size.max_x + s->universe_size.min_x) / 2.0;
-        quadrant = &s->childBottomNW;
-      } else {
-        new_universe_size.min_x = (s->universe_size.max_x + s->universe_size.min_x) / 2.0;
-        quadrant = &s->childBottomNE;
-      }
-    } else {
-      new_universe_size.min_y = (s->universe_size.max_y + s->universe_size.min_y) / 2.0;
-      if (body.x <= (s->universe_size.max_x + s->universe_size.min_x) / 2.0) {
-        new_universe_size.max_x = (s->universe_size.max_x + s->universe_size.min_x) / 2.0;
-        quadrant = &s->childBottomSW;
-      } else {
-        new_universe_size.min_x = (s->universe_size.max_x + s->universe_size.min_x) / 2.0;
-        quadrant = &s->childBottomSE;
-      }
-    }
-  }
-  // create a new subnode for an empty child
-  if (*quadrant == NULL) {
-    *quadrant = calloc(1, sizeof(Subnode));
-    **quadrant = newSubnode(new_universe_size);
-  }
-
-  return quadrant;
-  */
 }
 
 void computeMass(Subnode *s) {
@@ -221,6 +168,7 @@ double max(double a, double b, double c) {
 }
 
 void computeForceFromTree(Body object, Subnode *s, double fvec[3]) {
+  fvec[0] = 0; fvec[1] = 0; fvec[2] = 0; 
   if (s->node_count == 1) {
     computeForce(object, s->value, fvec);
   } else {
