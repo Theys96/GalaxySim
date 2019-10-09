@@ -14,7 +14,7 @@ int main(int argc, char** argv) {
   Universe uni = newCircularUniverse(n, 250, 30);
   universeToCsv(uni, "state0.csv");
 
-  printf("\nGalaxySim n-body simulation v1.1.0\n");
+  printf("\nGalaxySim n-body simulation v1.2.0\n");
   printTimestamp();
 
   printf("Specifications:\n");
