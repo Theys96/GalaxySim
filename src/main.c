@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
 
   readParameters();
 
-  printf("\nGalaxySim n-body simulation v1.2.1\n");
+  printf("\nGalaxySim n-body simulation v1.2.2\n");
   printTimestamp();
 
   printf("Specifications:\n");
@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
   printf("\titeration method  = %s\n", methodString(method));
   printf("\n");
 
-  Universe uni = newSpiralUniverse(n, r, 30);
+  Universe uni = newCircularUniverse(n, r, 30);
   universeToCsv(uni, "state0.csv");
 
   char filename[20];
