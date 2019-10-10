@@ -11,6 +11,7 @@
 int n = 1000;
 int size = 400;
 int nframes = 500;
+int r = 250;
 typedef enum { Euler, BarnesHut, MostSignificant } Method;
 Method method = Euler;
 
@@ -32,7 +33,7 @@ int main(int argc, char** argv) {
   printf("\titeration method  = %s\n", methodString(method));
   printf("\n");
 
-  Universe uni = newCircularUniverse(n, 250, 30);
+  Universe uni = newSpiralUniverse(n, r, 30);
   universeToCsv(uni, "state0.csv");
 
   char filename[20];
@@ -99,6 +100,7 @@ void readIntegerParameter(char* question, int* val) {
 
 void readParameters() {
   readIntegerParameter("Number of bodies", &n);
+  readIntegerParameter("Galaxy radius", &r);
   readIntegerParameter("Image size", &size);
   readIntegerParameter("Number of frames", &nframes);
 
