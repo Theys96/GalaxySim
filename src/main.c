@@ -12,7 +12,7 @@ int n = 1000;
 int size = 400;
 int nframes = 500;
 int r = 250;
-typedef enum { Euler, BarnesHut, MostSignificant } Method;
+typedef enum { Euler, RungeKutta, BarnesHut, MostSignificant } Method;
 Method method = Euler;
 
 void printTimestamp();
@@ -53,6 +53,10 @@ int main(int argc, char** argv) {
       default:
       case Euler:
         iterateEuler(&uni, 0.02);
+        break;
+
+      case RungeKutta:
+        iterateRungeKutta(&uni, 0.02);
         break;
 
       case BarnesHut:
@@ -106,12 +110,14 @@ void readParameters() {
 
   getchar();
   char c;
-  printf("Iteration method (e = Euler, b = Barnes-Hut, m = Most-Significant)? ");
+  printf("Iteration method (e = Euler, r = Runge-Kutta, b = Barnes-Hut, m = Most-Significant)? ");
   scanf("%c", &c);
   switch (c) {
     default:
     case 'e':
       method = Euler; break;
+    case 'r':
+      method = RungeKutta; break;
     case 'b':
       method = BarnesHut; break;
     case 'm':
@@ -123,6 +129,8 @@ char* methodString(Method method) {
   switch (method) {
     default:
     case Euler:
+      return "Euler";
+    case RungeKutta:
       return "Euler";
     case BarnesHut:
       return "Barnes-Hut";

@@ -10,6 +10,7 @@
 #include "tree.h"
 #include <stdlib.h>
 #include <math.h>
+#include <stdio.h>
 #include <time.h>
 #define G 1
 
@@ -49,14 +50,23 @@ Universe newUniverse(int n) {
   return u;
 }
 
+Universe copyUniverse(Universe u) {
+  Universe u2;
+  u2.n = u.n;
+  u2.bodies = calloc(u2.n, sizeof(Body));
+  for (int i = 0; i < u2.n; i++) {
+    u2.bodies[i] = u.bodies[i];
+  }
+  return u2;
+}
+
 void freeUniverse(Universe u) {
   free(u.bodies);
 }
 
 
-void iterateEuler(Universe* u, double dt) {
-  
-  // Update velocities
+
+void updateVelocities(Universe* u, double dt) {
   Body *b, *c;
   double f[3];
   for (int i = 0; i < u->n; i++) {
@@ -72,8 +82,15 @@ void iterateEuler(Universe* u, double dt) {
       c->dz -= dt * f[2]/(c->mass);
     }
   }
+}
+
+void iterateEuler(Universe* u, double dt) {
+  
+  // Update velocities
+  updateVelocities(u, dt);
 
   // Update locations
+  Body* b;
   for (int i = 0; i < u->n; i++) {
     b = u->bodies + i;
     b->x += dt * b->dx;
@@ -81,6 +98,66 @@ void iterateEuler(Universe* u, double dt) {
     b->z += dt * b->dz;
   }
 
+}
+
+void iterateRungeKutta(Universe* u, double dt) {
+  
+  Universe u2 = copyUniverse(*u);
+  Universe u3 = copyUniverse(*u);
+  Universe u4 = copyUniverse(*u);
+
+  updateVelocities(u, dt);
+
+  /* d2 */
+  Body *b1, *b2;
+  for (int i = 0; i < u2.n; i++) {
+    b1 = u->bodies + i;
+    b2 = u2.bodies + i;
+    b2->x += dt * b1->dx/2;
+    b2->y += dt * b1->dy/2;
+    b2->z += dt * b1->dz/2;
+  }
+  updateVelocities(&u2, dt);
+
+  /* d3 */
+  Body *b3;
+  for (int i = 0; i < u3.n; i++) {
+    b2 = u2.bodies + i;
+    b3 = u3.bodies + i;
+    b3->x += dt * b2->dx/2;
+    b3->y += dt * b2->dy/2;
+    b3->z += dt * b2->dz/2;
+  }
+  updateVelocities(&u3, dt);
+
+  /* d4 */
+  Body *b4;
+  for (int i = 0; i < u4.n; i++) {
+    b3 = u3.bodies + i;
+    b4 = u4.bodies + i;
+    b4->x += dt * b3->dx;
+    b4->y += dt * b3->dy;
+    b4->z += dt * b3->dz;
+  }
+  updateVelocities(&u4, dt);
+
+  /* final update */
+  for (int i = 0; i < u->n; i++) {
+    b1 = u->bodies + i;
+    b2 = u2.bodies + i;
+    b3 = u3.bodies + i;
+    b4 = u4.bodies + i;
+    b1->dx = b1->dx/6 + b2->dx/3 + b3->dx/3 + b4->dx/6;
+    b1->dy = b1->dy/6 + b2->dy/3 + b3->dy/3 + b4->dy/6;
+    b1->dz = b1->dz/6 + b2->dz/3 + b3->dz/3 + b4->dz/6;
+    b1->x += dt * b1->dx;
+    b1->y += dt * b1->dy;
+    b1->z += dt * b1->dz;
+  }
+
+  freeUniverse(u2);
+  freeUniverse(u3);
+  freeUniverse(u4);
 }
 
 void iterateBarnesHut(Universe* u, double dt) {

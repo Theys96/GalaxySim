@@ -57,6 +57,8 @@ void computeForce(Body a, Body b, double fvec[3]);
  */
 Universe newUniverse(int N);
 
+Universe copyUniverse(Universe u);
+
 /* Frees a universe struct (all of its bodies).
  * Inputs:
  *  - u            : Universe struct to free.
@@ -71,6 +73,8 @@ void freeUniverse(Universe u);
  *  - dt           : timestep to use for iteration.
  */
 void iterateEuler(Universe* u, double dt);
+
+void iterateRungeKutta(Universe* u, double dt);
 
 /* Iterates the universe state u to a next state with
  * timestep `dt` using the naive Eulerean method in
