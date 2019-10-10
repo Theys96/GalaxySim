@@ -11,7 +11,8 @@
 int n = 1000;
 int size = 400;
 int nframes = 500;
-typedef enum { Euler, BarnesHut } Method;
+int r = 250;
+typedef enum { Euler, BarnesHut, MostSignificant } Method;
 Method method = Euler;
 
 void printTimestamp();
@@ -32,7 +33,7 @@ int main(int argc, char** argv) {
   printf("\titeration method  = %s\n", methodString(method));
   printf("\n");
 
-  Universe uni = newCircularUniverse(n, 250, 30);
+  Universe uni = newSpiralUniverse(n, r, 30);
   universeToCsv(uni, "state0.csv");
 
   char filename[20];
@@ -56,6 +57,10 @@ int main(int argc, char** argv) {
 
       case BarnesHut:
         iterateBarnesHut(&uni, 0.02);
+        break;
+
+      case MostSignificant:
+        iterateMostSignificant(&uni, 0.02, 1000);
         break;
     }
     t1 = clock();
@@ -95,12 +100,13 @@ void readIntegerParameter(char* question, int* val) {
 
 void readParameters() {
   readIntegerParameter("Number of bodies", &n);
+  readIntegerParameter("Galaxy radius", &r);
   readIntegerParameter("Image size", &size);
   readIntegerParameter("Number of frames", &nframes);
 
   getchar();
   char c;
-  printf("Iteration method (e = Euler, b = Barnes-Hut)? ");
+  printf("Iteration method (e = Euler, b = Barnes-Hut, m = Most-Significant)? ");
   scanf("%c", &c);
   switch (c) {
     default:
@@ -108,6 +114,8 @@ void readParameters() {
       method = Euler; break;
     case 'b':
       method = BarnesHut; break;
+    case 'm':
+      method = MostSignificant; break;
   }
 }
 
@@ -118,5 +126,7 @@ char* methodString(Method method) {
       return "Euler";
     case BarnesHut:
       return "Barnes-Hut";
+    case MostSignificant:
+      return "Most-Significant";
   }
 }

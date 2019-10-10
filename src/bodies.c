@@ -110,3 +110,32 @@ void iterateBarnesHut(Universe* u, double dt) {
   }
 }
 
+void iterateMostSignificant(Universe* u, double dt, double minMass) {
+  // Update velocities
+  Body *b, *c;
+  double f[3];
+  for (int i = 0; i < u->n; i++) {
+    b = u->bodies + i;
+    if (b->mass >= minMass) {
+      for (int j = i+1; j < u->n; j++) {
+        c = u->bodies + j;
+        computeForce(*b, *c, f);
+        b->dx += dt * f[0]/(b->mass);
+        b->dy += dt * f[1]/(b->mass);
+        b->dz += dt * f[2]/(b->mass);
+        c->dx -= dt * f[0]/(c->mass);
+        c->dy -= dt * f[1]/(c->mass);
+        c->dz -= dt * f[2]/(c->mass);
+      }
+    }
+  }
+
+  // Update locations
+  for (int i = 0; i < u->n; i++) {
+    b = u->bodies + i;
+    b->x += dt * b->dx;
+    b->y += dt * b->dy;
+    b->z += dt * b->dz;
+  }
+}
+

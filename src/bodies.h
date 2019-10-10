@@ -81,4 +81,16 @@ void iterateEuler(Universe* u, double dt);
  */
 void iterateBarnesHut(Universe* u, double dt);
 
+/* Iterates the universe state u to a next state with
+ * timestep `dt` using the naive Eulerean method and only
+ * regarding the most significant body/bodies for the
+ * gravity simulation. This works if there is a single
+ * or a few very heavy bodies that more or less dictate
+ * all gravity.
+ * Inputs:
+ *  - u            : pointer to the universe state to iterate on.
+ *  - dt           : timestep to use for iteration.
+ */
+void iterateMostSignificant(Universe* u, double dt, double minMass);
+
 #endif
