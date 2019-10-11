@@ -6,7 +6,7 @@
 *.pbm
 
 #data
-*.csv
+Src/*.csv
 
 #binaries
 src/nbody
