@@ -114,8 +114,8 @@ int defaultMain(int argc, char** argv) {
 // For measuring energy discrepancies
 int customMain_energies(int argc, char** argv) {
 
-  if (argc < 5) {
-    printf("Error: required parameters: <method> <dt> <nframes> <repeats>\n");
+  if (argc < 6) {
+    printf("Error: required parameters: <method> <dt> <nframes> <repeats> <file>\n");
     return 0;
   }
 
@@ -127,6 +127,7 @@ int customMain_energies(int argc, char** argv) {
   dt = atof(argv[2]);
   nframes = atoi(argv[3]);
   int repeats = atoi(argv[4]);
+  char* filename = argv[5];
 
   printf("dt = %.2lf\n", dt);
   printf("method = %s\n", methodString(method));
@@ -134,6 +135,7 @@ int customMain_energies(int argc, char** argv) {
   printf("nframes = %d\n", nframes);
   printf("\n");
   
+  FILE* csv = fopen(filename, "a"); 
   Universe uni;
   for (int it = 0; it < repeats; it++ ) {
     uni = newCircularUniverse(n, r, 30);
@@ -157,8 +159,10 @@ int customMain_energies(int argc, char** argv) {
     double energy1 = totalEnergy(uni);
     double energyDiff = energy1-energy0;
     printf("%+.3lf%%\n", energyDiff/energy0*100);
+    fprintf(csv, "%d,%.5lf\n", nframes, energyDiff/energy0);
     freeUniverse(uni);
   }
+  fclose(csv);
   
   return 0;
 }
