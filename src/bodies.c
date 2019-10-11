@@ -14,6 +14,13 @@
 #include <time.h>
 #define G 1
 
+// Local methods
+void updateVelocities(Universe* u, double dt);
+void updateLocations(Universe* u, double dt);
+double totalPotentialEnergy(Universe u);
+double totalKineticEnergy(Universe u);
+
+
 Body newBody(double x, double y, double z, double dx, double dy, double dz, double mass) {
   Body b;
   b.x = x;
@@ -31,14 +38,13 @@ double bodyDistance(Body a, Body b) {
 }
 
 void computeForce(Body a, Body b, double fvec[3]) {
-  float dist = bodyDistance(a,b);
+  double dist = bodyDistance(a,b);
   if (dist < 1) { dist = 1; }
   int f = G * a.mass * b.mass / (dist*dist);
   fvec[0] = (b.x - a.x)/dist * f;
   fvec[1] = (b.y - a.y)/dist * f;
   fvec[2] = (b.z - a.z)/dist * f;
 }
-
 
 Universe newUniverse(int n) {
   Universe u;
@@ -60,11 +66,71 @@ Universe copyUniverse(Universe u) {
   return u2;
 }
 
+double totalEnergy(Universe u) {
+  return totalPotentialEnergy(u) + totalKineticEnergy(u);
+}
+
 void freeUniverse(Universe u) {
   free(u.bodies);
 }
 
 
+void iterateEuler(Universe* u, double dt) {
+  // Update locations
+  updateLocations(u, dt);
+
+  // Update velocities
+  updateVelocities(u, dt);
+}
+
+void iterateBarnesHut(Universe* u, double dt) {
+  // Update locations
+  updateLocations(u, dt);
+
+  // Create Tree
+  Tree t = newTree(*u);
+
+  // Update velocities
+  Body* b;
+  double f[3];
+  for (int i = 0; i < u->n; i++) {
+    b = u->bodies + i;
+    computeForceFromTree(*b, t, f);
+    b->dx += dt * f[0]/(b->mass);
+    b->dy += dt * f[1]/(b->mass);
+    b->dz += dt * f[2]/(b->mass);
+  }
+
+  // Free the tree 
+  freeTree(t);
+}
+
+void iterateMostSignificant(Universe* u, double dt, double minMass) {
+  // Update locations
+  updateLocations(u, dt);
+
+  // Update velocities
+  Body *b, *c;
+  double f[3];
+  for (int i = 0; i < u->n; i++) {
+    b = u->bodies + i;
+    if (b->mass >= minMass) {
+      for (int j = i+1; j < u->n; j++) {
+        c = u->bodies + j;
+        computeForce(*b, *c, f);
+        b->dx += dt * f[0]/(b->mass);
+        b->dy += dt * f[1]/(b->mass);
+        b->dz += dt * f[2]/(b->mass);
+        c->dx -= dt * f[0]/(c->mass);
+        c->dy -= dt * f[1]/(c->mass);
+        c->dz -= dt * f[2]/(c->mass);
+      }
+    }
+  }
+}
+
+
+/* HELPER FUNCTIONS */
 
 void updateVelocities(Universe* u, double dt) {
   Body *b, *c;
@@ -84,12 +150,7 @@ void updateVelocities(Universe* u, double dt) {
   }
 }
 
-void iterateEuler(Universe* u, double dt) {
-  
-  // Update velocities
-  updateVelocities(u, dt);
-
-  // Update locations
+void updateLocations(Universe* u, double dt) {
   Body* b;
   for (int i = 0; i < u->n; i++) {
     b = u->bodies + i;
@@ -97,122 +158,31 @@ void iterateEuler(Universe* u, double dt) {
     b->y += dt * b->dy;
     b->z += dt * b->dz;
   }
-
 }
 
-void iterateRungeKutta(Universe* u, double dt) {
-  
-  Universe u2 = copyUniverse(*u);
-  Universe u3 = copyUniverse(*u);
-  Universe u4 = copyUniverse(*u);
-
-  updateVelocities(u, dt);
-
-  /* d2 */
-  Body *b1, *b2;
-  for (int i = 0; i < u2.n; i++) {
-    b1 = u->bodies + i;
-    b2 = u2.bodies + i;
-    b2->x += dt * b1->dx/2;
-    b2->y += dt * b1->dy/2;
-    b2->z += dt * b1->dz/2;
-  }
-  updateVelocities(&u2, dt);
-
-  /* d3 */
-  Body *b3;
-  for (int i = 0; i < u3.n; i++) {
-    b2 = u2.bodies + i;
-    b3 = u3.bodies + i;
-    b3->x += dt * b2->dx/2;
-    b3->y += dt * b2->dy/2;
-    b3->z += dt * b2->dz/2;
-  }
-  updateVelocities(&u3, dt);
-
-  /* d4 */
-  Body *b4;
-  for (int i = 0; i < u4.n; i++) {
-    b3 = u3.bodies + i;
-    b4 = u4.bodies + i;
-    b4->x += dt * b3->dx;
-    b4->y += dt * b3->dy;
-    b4->z += dt * b3->dz;
-  }
-  updateVelocities(&u4, dt);
-
-  /* final update */
-  for (int i = 0; i < u->n; i++) {
-    b1 = u->bodies + i;
-    b2 = u2.bodies + i;
-    b3 = u3.bodies + i;
-    b4 = u4.bodies + i;
-    b1->dx = b1->dx/6 + b2->dx/3 + b3->dx/3 + b4->dx/6;
-    b1->dy = b1->dy/6 + b2->dy/3 + b3->dy/3 + b4->dy/6;
-    b1->dz = b1->dz/6 + b2->dz/3 + b3->dz/3 + b4->dz/6;
-    b1->x += dt * b1->dx;
-    b1->y += dt * b1->dy;
-    b1->z += dt * b1->dz;
-  }
-
-  freeUniverse(u2);
-  freeUniverse(u3);
-  freeUniverse(u4);
-}
-
-void iterateBarnesHut(Universe* u, double dt) {
-
-  // Create Tree
-  Tree t = newTree(*u);
-
-  // Update velocities
-  Body* b;
-  double f[3];
-  for (int i = 0; i < u->n; i++) {
-    b = u->bodies + i;
-    computeForceFromTree(*b, t, f);
-    b->dx += dt * f[0]/(b->mass);
-    b->dy += dt * f[1]/(b->mass);
-    b->dz += dt * f[2]/(b->mass);
-  }
-
-  // Free the tree 
-  freeTree(t);
-
-  for (int i = 0; i < u->n; i++) {
-    b = u->bodies + i;
-    b->x += dt * b->dx;
-    b->y += dt * b->dy;
-    b->z += dt * b->dz;
-  }
-}
-
-void iterateMostSignificant(Universe* u, double dt, double minMass) {
-  // Update velocities
-  Body *b, *c;
-  double f[3];
-  for (int i = 0; i < u->n; i++) {
-    b = u->bodies + i;
-    if (b->mass >= minMass) {
-      for (int j = i+1; j < u->n; j++) {
-        c = u->bodies + j;
-        computeForce(*b, *c, f);
-        b->dx += dt * f[0]/(b->mass);
-        b->dy += dt * f[1]/(b->mass);
-        b->dz += dt * f[2]/(b->mass);
-        c->dx -= dt * f[0]/(c->mass);
-        c->dy -= dt * f[1]/(c->mass);
-        c->dz -= dt * f[2]/(c->mass);
+double totalPotentialEnergy(Universe u) {
+  double dist;
+  double energy = 0;
+  Body a, b;
+  for (int i = 0; i < u.n; i++) {
+    a = u.bodies[i];
+    for (int j = i+1; j < u.n; j++) {
+      b = u.bodies[i];
+      dist = bodyDistance(a,b);
+      if (dist > 0) {
+        energy -= G * a.mass * b.mass / dist;
       }
     }
   }
-
-  // Update locations
-  for (int i = 0; i < u->n; i++) {
-    b = u->bodies + i;
-    b->x += dt * b->dx;
-    b->y += dt * b->dy;
-    b->z += dt * b->dz;
-  }
+  return energy;
 }
 
+double totalKineticEnergy(Universe u) {
+  double energy = 0;
+  Body a;
+  for (int i = 0; i < u.n; i++) {
+    a = u.bodies[i];
+    energy += a.mass + fabs(a.dx*a.dx + a.dy*a.dy + a.dz*a.dz);
+  }
+  return energy/2;
+}

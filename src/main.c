@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <math.h>
 
 #define str(x) #x
 #define xstr(x) str(x)
@@ -12,7 +13,8 @@ int n = 1000;
 int size = 400;
 int nframes = 500;
 int r = 250;
-typedef enum { Euler, RungeKutta, BarnesHut, MostSignificant } Method;
+double dt = 0.02;
+typedef enum { Euler, BarnesHut, MostSignificant } Method;
 Method method = Euler;
 
 void printTimestamp();
@@ -23,7 +25,7 @@ int main(int argc, char** argv) {
 
   readParameters();
 
-  printf("\nGalaxySim n-body simulation v1.2.2\n");
+  printf("\nGalaxySim n-body simulation v1.2.3\n");
   printTimestamp();
 
   printf("Specifications:\n");
@@ -35,6 +37,8 @@ int main(int argc, char** argv) {
 
   Universe uni = newCircularUniverse(n, r, 30);
   universeToCsv(uni, "state0.csv");
+
+  double energy0 = totalEnergy(uni);
 
   char filename[20];
   clock_t t0, t1, total0, total1;
@@ -52,19 +56,15 @@ int main(int argc, char** argv) {
     switch (method) {
       default:
       case Euler:
-        iterateEuler(&uni, 0.02);
-        break;
-
-      case RungeKutta:
-        iterateRungeKutta(&uni, 0.02);
+        iterateEuler(&uni, dt);
         break;
 
       case BarnesHut:
-        iterateBarnesHut(&uni, 0.02);
+        iterateBarnesHut(&uni, dt);
         break;
 
       case MostSignificant:
-        iterateMostSignificant(&uni, 0.02, 1000);
+        iterateMostSignificant(&uni, dt, 1000);
         break;
     }
     t1 = clock();
@@ -72,7 +72,13 @@ int main(int argc, char** argv) {
   }
   total1 = clock();
 
+  double energy1 = totalEnergy(uni);
+  double energyDiff = energy1-energy0;
+
   printf("Done.\n");
+  printf("%s %.2lf%% of the universe's energy during this simulation.\n", energyDiff > 0 ? "Gained" : "Lost", fabs(energyDiff)/energy0*100);
+  printf("\n");
+
   printf("Time used: %.3fs\n\n", (double)(total1 - total0) / CLOCKS_PER_SEC );
   printf("Time used rendering images and saving them to file:\n");
   printf("\t%.3fs total for %d frames\n", timeRendering, nframes);
@@ -85,7 +91,6 @@ int main(int argc, char** argv) {
 
   return 0;
 }
-
 
 /* HELPER FUNCTIONS */
 
@@ -110,14 +115,12 @@ void readParameters() {
 
   getchar();
   char c;
-  printf("Iteration method (e = Euler, r = Runge-Kutta, b = Barnes-Hut, m = Most-Significant)? ");
+  printf("Iteration method (e = Euler, b = Barnes-Hut, m = Most-Significant)? ");
   scanf("%c", &c);
   switch (c) {
     default:
     case 'e':
       method = Euler; break;
-    case 'r':
-      method = RungeKutta; break;
     case 'b':
       method = BarnesHut; break;
     case 'm':
@@ -129,8 +132,6 @@ char* methodString(Method method) {
   switch (method) {
     default:
     case Euler:
-      return "Euler";
-    case RungeKutta:
       return "Euler";
     case BarnesHut:
       return "Barnes-Hut";
