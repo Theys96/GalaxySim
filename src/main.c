@@ -8,7 +8,7 @@
 #define str(x) #x
 #define xstr(x) str(x)
 
-#define CURRENT_MAIN customMain_energies
+#define CURRENT_MAIN defaultMain
 #define VERSION "v1.2.3"
 
 /* PARAMETERS */
@@ -20,14 +20,15 @@ double dt = 0.02;
 typedef enum { Euler = 0, BarnesHut = 1, MostSignificant = 2 } Method;
 Method method = Euler;
 
+// Main functions:
+int defaultMain(int argc, char** argv);
+int customMain_energies(int argc, char** argv);
+
+// Helper functions:
 void printTimestamp();
 void printTitle();
 void readParameters();
 char* methodString(Method method);
-
-int defaultMain(int argc, char** argv);
-// Custom main functions:
-int customMain_energies(int argc, char** argv);
 
 
 
