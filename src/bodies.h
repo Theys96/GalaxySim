@@ -57,6 +57,10 @@ void computeForce(Body a, Body b, double fvec[3]);
  */
 Universe newUniverse(int N);
 
+Universe copyUniverse(Universe u);
+
+double totalEnergy(Universe u);
+
 /* Frees a universe struct (all of its bodies).
  * Inputs:
  *  - u            : Universe struct to free.

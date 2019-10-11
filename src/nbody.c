@@ -9,6 +9,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
+#include <sys/time.h>
 #include "nbody.h"
 #include "image.h"
 #define PI 3.14159265
@@ -55,7 +56,11 @@ Universe newCircularUniverse(int n, int size, int gapSize) {
   Universe u;
   u.n = n;
 
-  srand(time(NULL));
+  // Extra random!
+  struct timeval time; 
+  gettimeofday(&time,NULL);
+  srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
   u.bodies = calloc(n, sizeof(Body));
   u.bodies[0] = newBody(0, 0, 0, 0, 0, 0, 1000*u.n);
 
@@ -74,7 +79,11 @@ Universe newSpiralUniverse(int n, int size, int gapSize) {
   Universe u;
   u.n = n;
 
-  srand(time(NULL));
+  // Extra random!
+  struct timeval time; 
+  gettimeofday(&time,NULL);
+  srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
   u.bodies = calloc(n, sizeof(Body));
 
   double theta, rot, r, vr, rx, ry, vx, vy, localwidth, mass = 1;

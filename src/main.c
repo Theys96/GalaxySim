@@ -3,30 +3,49 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <math.h>
 
 #define str(x) #x
 #define xstr(x) str(x)
+
+#define CURRENT_MAIN defaultMain
+#define VERSION "v1.2.3"
 
 /* PARAMETERS */
 int n = 1000;
 int size = 400;
 int nframes = 500;
 int r = 250;
-typedef enum { Euler, BarnesHut, MostSignificant } Method;
+double dt = 0.02;
+typedef enum { Euler = 0, BarnesHut = 1, MostSignificant = 2 } Method;
 Method method = Euler;
 
+// Main functions:
+int defaultMain(int argc, char** argv);
+int customMain_energies(int argc, char** argv);
+
+// Helper functions:
 void printTimestamp();
+void printTitle();
 void readParameters();
 char* methodString(Method method);
 
+
+
 int main(int argc, char** argv) {
+  // CURRENT COMPILED MAIN FUNCTION:
+  return CURRENT_MAIN(argc, argv);
+}
+
+
+
+int defaultMain(int argc, char** argv) {
 
   readParameters();
 
-  printf("\nGalaxySim n-body simulation v1.2.2\n");
-  printTimestamp();
+  printTitle();
 
-  printf("Specifications:\n");
+  printf("\nSpecifications:\n");
   printf("\tn                 = %d\n", n);
   printf("\timage dimensions  = %dx%d\n", size, size);
   printf("\tframes            = %d\n", nframes);
@@ -35,6 +54,8 @@ int main(int argc, char** argv) {
 
   Universe uni = newCircularUniverse(n, r, 30);
   universeToCsv(uni, "state0.csv");
+
+  double energy0 = totalEnergy(uni);
 
   char filename[20];
   clock_t t0, t1, total0, total1;
@@ -52,15 +73,15 @@ int main(int argc, char** argv) {
     switch (method) {
       default:
       case Euler:
-        iterateEuler(&uni, 0.02);
+        iterateEuler(&uni, dt);
         break;
 
       case BarnesHut:
-        iterateBarnesHut(&uni, 0.02);
+        iterateBarnesHut(&uni, dt);
         break;
 
       case MostSignificant:
-        iterateMostSignificant(&uni, 0.02, 1000);
+        iterateMostSignificant(&uni, dt, 1000);
         break;
     }
     t1 = clock();
@@ -68,7 +89,13 @@ int main(int argc, char** argv) {
   }
   total1 = clock();
 
+  double energy1 = totalEnergy(uni);
+  double energyDiff = energy1-energy0;
+
   printf("Done.\n");
+  printf("%s %.2lf%% of the universe's energy during this simulation.\n", energyDiff > 0 ? "Gained" : "Lost", fabs(energyDiff)/energy0*100);
+  printf("\n");
+
   printf("Time used: %.3fs\n\n", (double)(total1 - total0) / CLOCKS_PER_SEC );
   printf("Time used rendering images and saving them to file:\n");
   printf("\t%.3fs total for %d frames\n", timeRendering, nframes);
@@ -83,11 +110,75 @@ int main(int argc, char** argv) {
 }
 
 
+/* CUSTOM MAIN FUNCTIONS (FOR SPECIFIC EXPERIMENTS) */
+
+// For measuring energy discrepancies
+int customMain_energies(int argc, char** argv) {
+
+  if (argc < 6) {
+    printf("Error: required parameters: <method> <dt> <nframes> <repeats> <file>\n");
+    return 0;
+  }
+
+  printTitle();
+  printf("CUSTOM program for measuring energy discrepancies.\n\n");
+
+  n = 200;
+  method = (Method)atoi(argv[1]);
+  dt = atof(argv[2]);
+  nframes = atoi(argv[3]);
+  int repeats = atoi(argv[4]);
+  char* filename = argv[5];
+
+  printf("dt = %.2lf\n", dt);
+  printf("method = %s\n", methodString(method));
+  printf("n (bodies) = %d\n", n);
+  printf("nframes = %d\n", nframes);
+  printf("\n");
+  
+  FILE* csv = fopen(filename, "a"); 
+  Universe uni;
+  for (int it = 0; it < repeats; it++ ) {
+    uni = newCircularUniverse(n, r, 30);
+    double energy0 = totalEnergy(uni);
+    for (int i = 0; i < nframes; i++) {
+      switch (method) {
+        default:
+        case Euler:
+          iterateEuler(&uni, dt);
+          break;
+
+        case BarnesHut:
+          iterateBarnesHut(&uni, dt);
+          break;
+
+        case MostSignificant:
+          iterateMostSignificant(&uni, dt, 1000);
+          break;
+      }
+    }
+    double energy1 = totalEnergy(uni);
+    double energyDiff = energy1-energy0;
+    printf("%+.3lf%%\n", energyDiff/energy0*100);
+    fprintf(csv, "%d,%.5lf\n", nframes, energyDiff/energy0);
+    freeUniverse(uni);
+  }
+  fclose(csv);
+  
+  return 0;
+}
+
+
 /* HELPER FUNCTIONS */
+
+void printTitle() {
+  printf("\nGalaxySim n-body simulation %s\n", VERSION);
+  printTimestamp();
+}
 
 void printTimestamp() {
   time_t ltime = time(NULL);
-  printf("%s\n",asctime(localtime(&ltime)));
+  printf("%s",asctime(localtime(&ltime)));
 }
 
 void readIntegerParameter(char* question, int* val) {
