@@ -8,27 +8,43 @@
 #define str(x) #x
 #define xstr(x) str(x)
 
+#define CURRENT_MAIN customMain_energies
+#define VERSION "v1.2.3"
+
 /* PARAMETERS */
 int n = 1000;
 int size = 400;
 int nframes = 500;
 int r = 250;
 double dt = 0.02;
-typedef enum { Euler, BarnesHut, MostSignificant } Method;
+typedef enum { Euler = 0, BarnesHut = 1, MostSignificant = 2 } Method;
 Method method = Euler;
 
 void printTimestamp();
+void printTitle();
 void readParameters();
 char* methodString(Method method);
 
+int defaultMain(int argc, char** argv);
+// Custom main functions:
+int customMain_energies(int argc, char** argv);
+
+
+
 int main(int argc, char** argv) {
+  // CURRENT COMPILED MAIN FUNCTION:
+  return CURRENT_MAIN(argc, argv);
+}
+
+
+
+int defaultMain(int argc, char** argv) {
 
   readParameters();
 
-  printf("\nGalaxySim n-body simulation v1.2.3\n");
-  printTimestamp();
+  printTitle();
 
-  printf("Specifications:\n");
+  printf("\nSpecifications:\n");
   printf("\tn                 = %d\n", n);
   printf("\timage dimensions  = %dx%d\n", size, size);
   printf("\tframes            = %d\n", nframes);
@@ -92,11 +108,72 @@ int main(int argc, char** argv) {
   return 0;
 }
 
+
+/* CUSTOM MAIN FUNCTIONS (FOR SPECIFIC EXPERIMENTS) */
+
+// For measuring energy discrepancies
+int customMain_energies(int argc, char** argv) {
+
+  if (argc < 5) {
+    printf("Error: required parameters: <method> <dt> <nframes> <repeats>\n");
+    return 0;
+  }
+
+  printTitle();
+  printf("CUSTOM program for measuring energy discrepancies.\n\n");
+
+  n = 200;
+  method = (Method)atoi(argv[1]);
+  dt = atof(argv[2]);
+  nframes = atoi(argv[3]);
+  int repeats = atoi(argv[4]);
+
+  printf("dt = %.2lf\n", dt);
+  printf("method = %s\n", methodString(method));
+  printf("n (bodies) = %d\n", n);
+  printf("nframes = %d\n", nframes);
+  printf("\n");
+  
+  Universe uni;
+  for (int it = 0; it < repeats; it++ ) {
+    uni = newCircularUniverse(n, r, 30);
+    double energy0 = totalEnergy(uni);
+    for (int i = 0; i < nframes; i++) {
+      switch (method) {
+        default:
+        case Euler:
+          iterateEuler(&uni, dt);
+          break;
+
+        case BarnesHut:
+          iterateBarnesHut(&uni, dt);
+          break;
+
+        case MostSignificant:
+          iterateMostSignificant(&uni, dt, 1000);
+          break;
+      }
+    }
+    double energy1 = totalEnergy(uni);
+    double energyDiff = energy1-energy0;
+    printf("%+.3lf%%\n", energyDiff/energy0*100);
+    freeUniverse(uni);
+  }
+  
+  return 0;
+}
+
+
 /* HELPER FUNCTIONS */
+
+void printTitle() {
+  printf("\nGalaxySim n-body simulation %s\n", VERSION);
+  printTimestamp();
+}
 
 void printTimestamp() {
   time_t ltime = time(NULL);
-  printf("%s\n",asctime(localtime(&ltime)));
+  printf("%s",asctime(localtime(&ltime)));
 }
 
 void readIntegerParameter(char* question, int* val) {
