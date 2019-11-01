@@ -17,6 +17,7 @@ int size = 400;
 int nframes = 500;
 int r = 250;
 double dt = 0.02;
+double delta_barnes_hut = 0.5;
 typedef enum { Euler = 0, BarnesHut = 1, MostSignificant = 2 } Method;
 Method method = Euler;
 
@@ -41,6 +42,10 @@ int main(int argc, char** argv) {
 
 int defaultMain(int argc, char** argv) {
 
+  if (argc > 1) {
+    delta_barnes_hut = atof(argv[1]);
+  }
+
   readParameters();
 
   printTitle();
@@ -50,6 +55,9 @@ int defaultMain(int argc, char** argv) {
   printf("\timage dimensions  = %dx%d\n", size, size);
   printf("\tframes            = %d\n", nframes);
   printf("\titeration method  = %s\n", methodString(method));
+  if (method == BarnesHut) {
+    printf("\tdelta barnes hut  = %f\n", delta_barnes_hut);
+  }
   printf("\n");
 
   Universe uni = newCircularUniverse(n, r, 30);
@@ -105,6 +113,11 @@ int defaultMain(int argc, char** argv) {
   printf("\t%.3fs total for %d frames\n", timeComputing, nframes);
   printf("\t%.3fms on average\n", timeComputing / nframes * 1000 );
   printf("\n");
+
+  // save
+  FILE * fp = fopen ("analysis/delta_barnes_variation.csv", "a");
+  fprintf (fp, "%d,%f,%.5f,%.3f\n", n, delta_barnes_hut, energyDiff/energy0, (double)(total1 - total0) / CLOCKS_PER_SEC);
+  fclose (fp);
 
   return 0;
 }

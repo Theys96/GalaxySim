@@ -15,8 +15,8 @@
 #define PI 3.14159265
 
 void renderUniverse(Universe u, char* filename, int cx, int cy, double scale, int width, int height) {
-  cx += width/2;
-  cy += height/2;
+  cx = width/2 -cx;
+  cy = height/2 - cy;
 
   Image img = newImage(width, height);
 
@@ -86,7 +86,7 @@ Universe newSpiralUniverse(int n, int size, int gapSize) {
 
   u.bodies = calloc(n, sizeof(Body));
 
-  double theta, rot, r, vr, rx, ry, vx, vy, localwidth, mass = 1;
+  double theta, rot, r, rx, ry, vx, vy, localwidth, mass = 1;
   int ellipses = u.n/10;
   int num = 10;
   double eangle = 540/(double)ellipses;
@@ -98,7 +98,6 @@ Universe newSpiralUniverse(int n, int size, int gapSize) {
     for (int i = 0; i < num; i++) {
       theta = PI * (rand() % 360) / 180;
       r = (double)(rand() % (int)(localwidth*1000))/1000;
-      vr = r;
       rx = (gapSize + r) * cos(theta) * 1;
       ry = (gapSize + r) * sin(theta) * .9;
       r = sqrt(rx*rx + ry*ry);

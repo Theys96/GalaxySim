@@ -11,6 +11,8 @@
 
 #include "bodies.h"
 
+extern double delta_barnes_hut;
+
 typedef struct UniverseSize {
   double min_x;
   double max_x;
