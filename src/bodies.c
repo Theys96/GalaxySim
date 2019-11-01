@@ -46,6 +46,14 @@ void computeForce(Body a, Body b, double fvec[3]) {
   fvec[2] = (b.z - a.z)/dist * f;
 }
 
+Body addBodies(Body a, Body b) {
+  Body c = { 
+    a.x + b.x, a.y + b.y, a.z + b.z,
+    a.dx + b.dx, a.dy + b.dy, a.dz + b.dz,
+    a.mass + b.mass };
+  return c;
+}
+
 Universe newUniverse(int n) {
   Universe u;
   u.n = n;
@@ -83,7 +91,7 @@ void iterateEuler(Universe* u, double dt) {
   updateVelocities(u, dt);
 }
 
-void iterateBarnesHut(Universe* u, double dt) {
+void iterateBarnesHut(Universe* u, double dt, double theta) {
   // Update locations
   updateLocations(u, dt);
 
@@ -95,7 +103,7 @@ void iterateBarnesHut(Universe* u, double dt) {
   double f[3];
   for (int i = 0; i < u->n; i++) {
     b = u->bodies + i;
-    computeForceFromTree(*b, t, f);
+    computeForceFromTree(*b, t, f, theta);
     b->dx += dt * f[0]/(b->mass);
     b->dy += dt * f[1]/(b->mass);
     b->dz += dt * f[2]/(b->mass);
