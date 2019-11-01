@@ -14,7 +14,7 @@
 #include "image.h"
 #define PI 3.14159265
 
-void renderUniverse(Universe u, char* filename, int cx, int cy, double scale, int width, int height) {
+void renderUniverse(Universe u, char* filename, int cx, int cy, double scale, int width, int height, float blackHoleMass) {
   cx = width/2 -cx;
   cy = height/2 - cy;
 
@@ -26,7 +26,7 @@ void renderUniverse(Universe u, char* filename, int cx, int cy, double scale, in
     a = u.bodies[i];
     ax = (int)((a.x/scale+cx));
     ay = (int)((a.y/scale+cy));
-    if ( ax >= 0 && ax < width && ay >= 0 && ay < height) {
+    if ( ax >= 0 && ax < width && ay >= 0 && ay < height && (blackHoleMass == 0 || a.mass < blackHoleMass)) {
       setPixel(img, ax, ay, 255);
     }
   }
@@ -49,6 +49,23 @@ void universeToCsv(Universe u, char* filename) {
     fprintf(file, "%d,%d,%d,%d,%d,%d\n",i,x,y,z,r,theta);
   }
   fclose(file); 
+}
+
+
+Universe combineUniverses(Universe a, Body a_transform, Universe b, Body b_transform) {
+  Universe u;
+  u.n = a.n + b.n;
+  u.bodies = calloc(u.n, sizeof(Body));
+
+  for (size_t i = 0; i < a.n; i++) {
+    u.bodies[i] = addBodies(a.bodies[i], a_transform);
+  }
+
+  for (size_t i = 0; i < b.n; i++) {
+    u.bodies[a.n+i] = addBodies(b.bodies[i], b_transform);
+  }
+
+  return u;
 }
 
 

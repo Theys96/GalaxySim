@@ -24,7 +24,6 @@ double max(double a, double b, double c);
 
 #define DELTA_STAR 0.0001
 
-
 Tree newTree(Universe u) {
   Tree t = calloc(1, sizeof(Subnode));
   *t = newSubnode(getUniverseSize(u));
@@ -38,21 +37,21 @@ Tree newTree(Universe u) {
   return t;
 }
 
-void computeForceFromTree(Body object, Subnode *s, double fvec[3]) {
+void computeForceFromTree(Body object, Subnode *s, double fvec[3], double theta) {
   fvec[0] = 0; fvec[1] = 0; fvec[2] = 0; 
   if (s->node_count == 1) {
     computeForce(object, s->value, fvec);
   } else {
     double radius = bodyDistance(object, s->value);
     double height = max(s->size.max_x - s->size.min_x, s->size.max_y - s->size.min_y, s->size.max_z - s->size.min_z);
-    if (height/radius < delta_barnes_hut) {
+    if (height/radius < theta) {
       computeForce(object, s->value, fvec);
     } else {
       // compute the forces for all child cubic cells
       for (size_t i = 0; i < 8; i++) {
         if (s->children[i] != NULL) {
           double fsubvec[3];
-          computeForceFromTree(object, s->children[i], fsubvec);
+          computeForceFromTree(object, s->children[i], fsubvec, theta);
           fvec[0] += fsubvec[0];
           fvec[1] += fsubvec[1];
           fvec[2] += fsubvec[2];

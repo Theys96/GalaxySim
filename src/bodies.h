@@ -49,6 +49,13 @@ double bodyDistance(Body a, Body b);
  */
 void computeForce(Body a, Body b, double fvec[3]);
 
+/* Perform an addition operation on two bodies. This is useful for transforming
+ * the location and velocity vectors using another "Body" as the transformation.
+ * Inputs:
+ *  - a, b         : Bodies to add together.
+ */
+Body addBodies(Body a, Body b);
+
 
 /* Returns a new Universe struct with N bodies in it,
  * already allocated.
@@ -82,8 +89,9 @@ void iterateEuler(Universe* u, double dt);
  * Inputs:
  *  - u            : pointer to the universe state to iterate on.
  *  - dt           : timestep to use for iteration.
+ *  - theta        : theta paarmeter for the Barnes-Hut algorithm
  */
-void iterateBarnesHut(Universe* u, double dt);
+void iterateBarnesHut(Universe* u, double dt, double theta);
 
 /* Iterates the universe state u to a next state with
  * timestep `dt` using the naive Eulerean method and only
