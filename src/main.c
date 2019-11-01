@@ -8,7 +8,7 @@
 #define str(x) #x
 #define xstr(x) str(x)
 
-#define CURRENT_MAIN customMain_collidingGalaxies
+#define CURRENT_MAIN defaultMain
 #define VERSION "v1.2.5"
 
 /* PARAMETERS */
@@ -56,6 +56,12 @@ int defaultMain(int argc, char** argv) {
     printf("\tBarnes-Hut theta  = %.3f\n", theta);
   }
   printf("\n");
+
+  //Universe b      = newSingleBodyUniverse(newBody(0,0,0,0,0,0,100000));
+  //Universe spiral = newSpiralUniverse(n, r, 30);
+  //Universe uni    = combineUniverses(spiral, newBody(0,0,0,0,0,0,0), b, newBody(0,-(1.5*r),0,sqrt((100000+1000*n)/(1.5*r)),0,0,0));
+  //freeUniverse(b);
+  //freeUniverse(spiral);
 
   Universe uni = newCircularUniverse(n, r, 30);
   // universeToCsv(uni, "state0.csv");

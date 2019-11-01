@@ -49,6 +49,12 @@ Universe newCircularUniverse(int n, int size, int gapSize);
  */
 Universe newSpiralUniverse(int n, int size, int gapSize);
 
+/* Sets up a Universe struct with a single given body.
+ * Inputs:
+ *  - b              : The only body contained in the universe.
+ */
+Universe newSingleBodyUniverse(Body b);
+
 /* Takes two systems of bodies ("universes") and combines them into one, creating a new universe.
  * The universes may be given a new center position (0,0,0)->(x,y,z) and velocity.
  * These transformations are given as "Body" objects.

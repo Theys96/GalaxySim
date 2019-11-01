@@ -133,3 +133,11 @@ Universe newSpiralUniverse(int n, int size, int gapSize) {
 
   return u;
 }
+
+Universe newSingleBodyUniverse(Body b) {
+  Universe u;
+  u.n = 1;
+  u.bodies = calloc(1, sizeof(Body));
+  u.bodies[0] = b;
+  return u;
+}
