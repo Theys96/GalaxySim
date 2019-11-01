@@ -45,8 +45,9 @@ Tree newTree(Universe u);
  *              the exerted force for.
  *  - s       : Barnes-Hut tree object representing the universe.
  *  - fvec    : Vector of 3 doubles to return the force vector.
+ *  - theta   : Theta parameter for the Barnes-Hut algorithm.
  */
-void computeForceFromTree(Body object, Subnode *s, double fvec[3]);
+void computeForceFromTree(Body object, Subnode *s, double fvec[3], double theta);
 
 /* Frees the given Barnes-Hut tree and with it all its subnodes.
  * Inputs:

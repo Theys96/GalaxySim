@@ -1,0 +1,30 @@
+Number of bodies (3000)? 0
+Galaxy radius (750)? 0
+Image size (400)? 0
+Image scale (5)? 0
+Number of frames (500)? 5000
+Iteration method (e = Euler, b = Barnes-Hut, m = Most-Significant)? e
+
+GalaxySim n-body simulation v1.2.6
+Fri Nov  1 17:05:45 2019
+
+Specifications:
+	n                 = 3000
+	image dimensions  = 400x400
+	scale             = 5
+	frames            = 5000
+	iteration method  = Euler
+
+Done.
+Lost 2.39% of the universe's energy during this simulation.
+
+Time used: 593.259s
+
+Time used rendering images and saving them to file:
+	7.427s total for 5000 frames
+	1.485ms on average
+
+Time used updating the universe state:
+	585.682s total for 5000 frames
+	117.136ms on average
+
