@@ -15,8 +15,8 @@
 #define PI 3.14159265
 
 void renderUniverse(Universe u, char* filename, int cx, int cy, double scale, int width, int height) {
-  cx = width/2 -cx;
-  cy = height/2 - cy;
+  cx = width/2*scale -cx;
+  cy = height/2*scale - cy;
 
   Image img = newImage(width, height);
 
@@ -24,8 +24,8 @@ void renderUniverse(Universe u, char* filename, int cx, int cy, double scale, in
   int ax, ay;
   for (int i = 0; i < u.n; i++) {
     a = u.bodies[i];
-    ax = (int)((a.x/scale+cx));
-    ay = (int)((a.y/scale+cy));
+    ax = (int)((a.x/scale+cx/scale));
+    ay = (int)((a.y/scale+cy/scale));
     if ( ax >= 0 && ax < width && ay >= 0 && ay < height) {
       setPixel(img, ax, ay, 255);
     }
@@ -52,7 +52,7 @@ void universeToCsv(Universe u, char* filename) {
 }
 
 
-Universe newCircularUniverse(int n, int size, int gapSize) {
+Universe newCircularUniverse(int n, int size, int gapSize, Body heavyBody) {
   Universe u;
   u.n = n;
 
@@ -62,14 +62,15 @@ Universe newCircularUniverse(int n, int size, int gapSize) {
   srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
   u.bodies = calloc(n, sizeof(Body));
-  u.bodies[0] = newBody(0, 0, 0, 0, 0, 0, 1000*u.n);
+  // u.bodies[0] = newBody(0, 0, 0, 0, 0, 0, 1000*u.n);
+  u.bodies[0] = heavyBody;
 
   double theta, r, ov, mass = 1000*u.n+10;
   for (int i = 1; i < u.n; i++) {
     theta = rand() % 360;
     r = gapSize + (rand() % (size - gapSize));
     ov = sqrt(mass/r);
-    u.bodies[i] = newBody(r*cos(theta), r*sin(theta), 0, -ov*sin(theta), ov*cos(theta), 0, 10);
+    u.bodies[i] = newBody(u.bodies[0].x + r*cos(theta), u.bodies[0].y + r*sin(theta), u.bodies[0].z, u.bodies[0].dx - ov*sin(theta), u.bodies[0].dy + ov*cos(theta), u.bodies[0].dz, 10);
   }
 
   return u;

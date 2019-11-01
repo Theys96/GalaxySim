@@ -2,6 +2,7 @@
 #include "tree.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <math.h>
 
@@ -24,8 +25,10 @@ Method method = Euler;
 // Main functions:
 int defaultMain(int argc, char** argv);
 int customMain_energies(int argc, char** argv);
+int customMain_collisions(int argc, char** argv);
 
 // Helper functions:
+void simulate(Universe uni, int saveImage, double *timeRendering, double *timeComputing);
 void printTimestamp();
 void printTitle();
 void readParameters();
@@ -60,41 +63,15 @@ int defaultMain(int argc, char** argv) {
   }
   printf("\n");
 
-  Universe uni = newCircularUniverse(n, r, 30);
+  Universe uni = newCircularUniverse(n, r, 30, newBody(0, 0, 0, 0, 0, 0, 1000*n)));
   universeToCsv(uni, "state0.csv");
 
   double energy0 = totalEnergy(uni);
 
-  char filename[20];
-  clock_t t0, t1, total0, total1;
+  clock_t total0, total1;
   double timeRendering = 0, timeComputing = 0;
   total0 = clock();
-  for (int i = 0; i < nframes; i++) {
-    sprintf(filename, "img/image%04d.pbm", i+1);
-
-    t0 = clock();
-    renderUniverse(uni, filename, 0, 0, 1, size, size);
-    t1 = clock();
-    timeRendering += (double)(t1 - t0) / CLOCKS_PER_SEC;
-
-    t0 = clock();
-    switch (method) {
-      default:
-      case Euler:
-        iterateEuler(&uni, dt);
-        break;
-
-      case BarnesHut:
-        iterateBarnesHut(&uni, dt);
-        break;
-
-      case MostSignificant:
-        iterateMostSignificant(&uni, dt, 1000);
-        break;
-    }
-    t1 = clock();
-    timeComputing += (double)(t1 - t0) / CLOCKS_PER_SEC;
-  }
+  simulate(uni, 1, &timeRendering, &timeComputing);
   total1 = clock();
 
   double energy1 = totalEnergy(uni);
@@ -148,28 +125,13 @@ int customMain_energies(int argc, char** argv) {
   printf("n (bodies) = %d\n", n);
   printf("nframes = %d\n", nframes);
   printf("\n");
-  
-  FILE* csv = fopen(filename, "a"); 
+
+  FILE* csv = fopen(filename, "a");
   Universe uni;
   for (int it = 0; it < repeats; it++ ) {
-    uni = newCircularUniverse(n, r, 30);
+    uni = newCircularUniverse(n, r, 30, newBody(0, 0, 0, 0, 0, 0, 1000*n)));
     double energy0 = totalEnergy(uni);
-    for (int i = 0; i < nframes; i++) {
-      switch (method) {
-        default:
-        case Euler:
-          iterateEuler(&uni, dt);
-          break;
-
-        case BarnesHut:
-          iterateBarnesHut(&uni, dt);
-          break;
-
-        case MostSignificant:
-          iterateMostSignificant(&uni, dt, 1000);
-          break;
-      }
-    }
+    simulate(uni, 0, NULL, NULL);
     double energy1 = totalEnergy(uni);
     double energyDiff = energy1-energy0;
     printf("%+.3lf%%\n", energyDiff/energy0*100);
@@ -177,12 +139,78 @@ int customMain_energies(int argc, char** argv) {
     freeUniverse(uni);
   }
   fclose(csv);
-  
+
+  return 0;
+}
+
+// For showing the collisions
+int customMain_collisions(int argc, char** argv) {
+
+  if (argc > 1) {
+    delta_barnes_hut = atof(argv[1]);
+  }
+
+  scale = 6.0;
+
+  Universe uni1 = newCircularUniverse(n, r, 30, newBody(0, 0, 0, 0, 0, 0, 1000*n)));
+  Universe uni2 = newCircularUniverse(n, r, 30, newBody(600, 600, 0, 0, -50, 10, 1000*n), newBody(600, 600, 0, 0, -50, 10, 1000*n));
+  Universe uni;
+  uni.n = uni1.n + uni2.n;
+  uni.bodies = calloc(uni.n, sizeof(Body));
+  memcpy(uni.bodies, uni1.bodies, sizeof(Body) * uni1.n);
+  memcpy(uni.bodies + uni1.n, uni2.bodies, sizeof(Body) * uni2.n);
+  universeToCsv(uni, "state0.csv");
+  simulate(uni, 1, NULL, NULL);
+
   return 0;
 }
 
 
 /* HELPER FUNCTIONS */
+
+void simulate(Universe uni, int saveImage, double *timeRendering, double *timeComputing) {
+  char filename[20];
+  clock_t t0, t1;
+  for (int i = 0; i < nframes; i++) {
+    if (saveImage) {
+      sprintf(filename, "img/image%04d.pbm", i+1);
+
+      if (timeRendering != NULL) {
+        t0 = clock();
+      }
+      // center the first galaxy in the image
+      renderUniverse(uni, filename, uni.bodies[0].x, uni.bodies[0].y, scale, size, size);
+      // center origin of the coordinate system in the image
+      // renderUniverse(uni, filename, 0, 0, scale, size, size);
+      if (timeRendering != NULL) {
+        t1 = clock();
+        *timeRendering += (double)(t1 - t0) / CLOCKS_PER_SEC;
+      }
+    }
+
+    if (timeComputing != NULL) {
+      t0 = clock();
+    }
+    switch (method) {
+      default:
+      case Euler:
+        iterateEuler(&uni, dt);
+        break;
+
+      case BarnesHut:
+        iterateBarnesHut(&uni, dt);
+        break;
+
+      case MostSignificant:
+        iterateMostSignificant(&uni, dt, 1000);
+        break;
+    }
+    if (timeComputing != NULL) {
+      t1 = clock();
+      *timeComputing += (double)(t1 - t0) / CLOCKS_PER_SEC;
+    }
+  }
+}
 
 void printTitle() {
   printf("\nGalaxySim n-body simulation %s\n", VERSION);
